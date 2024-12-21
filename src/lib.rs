@@ -12,6 +12,8 @@ pub mod layout;
 pub mod elements;
 pub mod commands;
 
+mod mem;
+
 use elements::ElementConfigType;
 
 use crate::bindings::*;

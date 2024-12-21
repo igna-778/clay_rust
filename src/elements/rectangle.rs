@@ -1,6 +1,4 @@
-use std::mem::MaybeUninit;
-
-use crate::{bindings::*, TypedConfig};
+use crate::{bindings::*, mem::zeroed_init, TypedConfig};
 
 use super::ElementConfigType;
 
@@ -10,14 +8,9 @@ pub struct Rectangle {
 
 impl Rectangle {
     pub fn new() -> Self {
-        let inner = MaybeUninit::<Clay_RectangleElementConfig>::zeroed(); // Creates zero-initialized uninitialized memory
-        let inner = unsafe { inner.assume_init() };
-        Self { inner }
-    }
-
-    fn null_id() -> Clay_ElementId {
-        let inner = MaybeUninit::<Clay_ElementId>::zeroed(); // Creates zero-initialized uninitialized memory
-        unsafe { inner.assume_init() }
+        Self {
+            inner: zeroed_init()
+        }
     }
 
     pub fn color(&mut self, color: (f32, f32, f32, f32)) -> &mut Self {
@@ -35,7 +28,7 @@ impl Rectangle {
 
         TypedConfig {
             config_memory: memory as _,
-            id: Self::null_id(),
+            id: zeroed_init(),
             config_type: ElementConfigType::Rectangle as _,
         }
     }
