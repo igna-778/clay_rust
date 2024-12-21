@@ -27,3 +27,21 @@ pub enum PointerCaptureMode {
     Capture = Clay_PointerCaptureMode_CLAY_POINTER_CAPTURE_MODE_CAPTURE,
     Passthrough = Clay_PointerCaptureMode_CLAY_POINTER_CAPTURE_MODE_PASSTHROUGH,
 }
+
+#[derive(Debug, Clone, PartialEq)]
+#[repr(C)]
+pub struct Dimensions {
+    width: f32,
+    height: f32
+}
+
+impl From<Clay_Dimensions> for Dimensions {
+    fn from(value: Clay_Dimensions) -> Self {
+        unsafe { std::mem::transmute(value) }
+    }
+}
+impl From<Dimensions> for Clay_Dimensions {
+    fn from(value: Dimensions) -> Self {
+        unsafe { std::mem::transmute(value) }
+    }
+}

@@ -63,11 +63,7 @@ impl Clay {
             } else {
                 unsafe {
                     Clay__AttachElementConfig(
-                        // This isn't strictcly correct, but as this is a union of pointers
-                        // we can cast to any of them.
-                        Clay_ElementConfigUnion {
-                            rectangleElementConfig: config.config_memory as _,
-                        },
+                        std::mem::transmute(config.config_memory),
                         config.config_type as _,
                     )
                 };
@@ -127,12 +123,12 @@ mod tests {
             |clay| {
                 clay.with(
                     [
-                        Layout::new()
-                            .sizing_width(Sizing::Fixed(100.0))
-                            .sizing_height(Sizing::Fixed(100.0))
+                        layout::Layout::new()
+                            .sizing_width(layout::Sizing::Fixed(100.0))
+                            .sizing_height(layout::Sizing::Fixed(100.0))
                             .padding((10, 10))
                             .end(),
-                        Rectangle::new().color((255.0, 255.0, 255.0, 0.0)).end(),
+                        elements::rectangle::Rectangle::new().color((255.0, 255.0, 255.0, 0.0)).end(),
                     ],
                     |_clay| {},
                 );
