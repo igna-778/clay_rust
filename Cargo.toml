@@ -1,0 +1,15 @@
+[package]
+name = "rust_clay"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+bindgen = "0.71.1"
+libc = "0.2.169"
+cc = "1.0"
+
+[lib]
+
+[build-dependencies]
+cc = "1.0"
+bindgen = "0.71.1"
