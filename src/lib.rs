@@ -8,9 +8,9 @@ pub mod bindings {
 #[cfg(not(feature = "build-clay"))]
 pub mod bindings;
 
-pub mod layout;
-pub mod elements;
 pub mod commands;
+pub mod elements;
+pub mod layout;
 
 mod mem;
 
@@ -25,7 +25,6 @@ pub struct TypedConfig {
     pub id: Clay_ElementId,
     pub config_type: ElementConfigType,
 }
-
 
 pub struct Clay {
     // Memory used internally by clay
@@ -111,7 +110,9 @@ mod tests {
                     .sizing_height(layout::Sizing::Fixed(100.0))
                     .padding((10, 10))
                     .end(),
-                elements::rectangle::Rectangle::new().color((255.0, 255.0, 255.0, 0.0)).end(),
+                elements::rectangle::Rectangle::new()
+                    .color((255.0, 255.0, 255.0, 0.0))
+                    .end(),
             ],
             |clay| {
                 clay.with(

@@ -1,10 +1,10 @@
 use crate::bindings::*;
 
-pub mod rectangle;
 pub mod containers;
-pub mod image;
-pub mod text;
 pub mod custom;
+pub mod image;
+pub mod rectangle;
+pub mod text;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]

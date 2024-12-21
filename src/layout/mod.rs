@@ -84,7 +84,7 @@ pub struct Layout {
 impl Layout {
     pub fn new() -> Self {
         Self {
-            inner: zeroed_init()
+            inner: zeroed_init(),
         }
     }
 
