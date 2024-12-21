@@ -1,6 +1,4 @@
-use crate::{bindings::*, mem::zeroed_init, TypedConfig};
-
-use super::ElementConfigType;
+use crate::{bindings::*, mem::zeroed_init};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[repr(u32)]
@@ -8,6 +6,16 @@ pub enum TextElementConfigWrapMode {
     Words = Clay_TextElementConfigWrapMode_CLAY_TEXT_WRAP_WORDS,
     Newline = Clay_TextElementConfigWrapMode_CLAY_TEXT_WRAP_NEWLINES,
     None = Clay_TextElementConfigWrapMode_CLAY_TEXT_WRAP_NONE,
+}
+
+pub struct TextElementConfig {
+    inner: *mut Clay_TextElementConfig,
+}
+
+impl Into<*mut Clay_TextElementConfig> for TextElementConfig {
+    fn into(self) -> *mut Clay_TextElementConfig {
+        self.inner
+    }
 }
 
 pub struct Text {
@@ -56,13 +64,9 @@ impl Text {
         self
     }
 
-    pub fn end(&self) -> TypedConfig {
+    pub fn end(&self) -> TextElementConfig {
         let memory = unsafe { Clay__StoreTextElementConfig(self.inner) };
 
-        TypedConfig {
-            config_memory: memory as _,
-            id: zeroed_init(),
-            config_type: ElementConfigType::Text as _,
-        }
+        TextElementConfig { inner: memory }
     }
 }

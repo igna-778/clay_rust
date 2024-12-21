@@ -14,7 +14,7 @@ pub mod layout;
 
 mod mem;
 
-use elements::ElementConfigType;
+use elements::{text::TextElementConfig, ElementConfigType};
 
 use crate::bindings::*;
 
@@ -81,6 +81,16 @@ impl Clay {
         unsafe {
             Clay__CloseElement();
         }
+    }
+
+    pub fn text(&self, text: String, config: TextElementConfig) {
+        unsafe { Clay__OpenTextElement(text.into(), config.into()) };
+    }
+}
+
+impl Into<Clay_String> for String {
+    fn into(self) -> Clay_String {
+        Clay_String { length: self.len() as _, chars: self.as_ptr() as _ }
     }
 }
 
