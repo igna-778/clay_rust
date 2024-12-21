@@ -24,23 +24,23 @@ pub struct TypedConfig {
     pub config_type: ElementConfigType,
 }
 
-#[derive(Debug, Clone)]
+
 pub struct Clay {
-    // memory owned by clay, destroyed at exit
-    mem_raw: *const u8,
+    // Memory used internally by clay
+    _memory: Vec<u8>,
 }
 
 impl Clay {
     pub fn new(width: f32, height: f32) -> Self {
         let memory_size = unsafe { Clay_MinMemorySize() };
         let memory = vec![0; memory_size as usize];
-        let mem_raw = Box::into_raw(memory.into_boxed_slice()) as *const u8;
         unsafe {
-            let arena = Clay_CreateArenaWithCapacityAndMemory(memory_size as _, mem_raw as _);
+            let arena =
+                Clay_CreateArenaWithCapacityAndMemory(memory_size as _, memory.as_ptr() as _);
             Clay_Initialize(arena, Clay_Dimensions { width, height });
         }
 
-        Self { mem_raw }
+        Self { _memory: memory }
     }
 
     pub fn begin(&self) {
@@ -51,7 +51,7 @@ impl Clay {
         unsafe { Clay_EndLayout() }
     }
 
-    pub fn with<F: FnOnce(), const N: usize>(&self, configs: [TypedConfig; N], f: F) {
+    pub fn with<F: FnOnce(&Clay), const N: usize>(&self, configs: [TypedConfig; N], f: F) {
         unsafe { Clay__OpenElement() };
 
         for config in configs {
@@ -75,17 +75,10 @@ impl Clay {
 
         unsafe { Clay__ElementPostConfiguration() };
 
-        f();
+        f(self);
 
-        unsafe { Clay__CloseElement(); }
-    }
-}
-
-impl Drop for Clay {
-    fn drop(&mut self) {
         unsafe {
-            // drops the memory
-            let _memory = Box::from_raw(self.mem_raw as *mut u8);
+            Clay__CloseElement();
         }
     }
 }
@@ -118,9 +111,18 @@ mod tests {
                     .end(),
                 elements::rectangle::Rectangle::new().color((255.0, 255.0, 255.0, 0.0)).end(),
             ],
-            || {
-
-                // do nothing
+            |clay| {
+                clay.with(
+                    [
+                        Layout::new()
+                            .sizing_width(Sizing::Fixed(100.0))
+                            .sizing_height(Sizing::Fixed(100.0))
+                            .padding((10, 10))
+                            .end(),
+                        Rectangle::new().color((255.0, 255.0, 255.0, 0.0)).end(),
+                    ],
+                    |_clay| {},
+                );
             },
         );
 
