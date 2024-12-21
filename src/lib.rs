@@ -242,7 +242,8 @@ impl Clay {
         let memory_size = unsafe { Clay_MinMemorySize() };
         let memory = vec![0; memory_size as usize];
         unsafe {
-            let arena = Clay_CreateArenaWithCapacityAndMemory(memory_size as _, memory.as_ptr() as _);
+            let arena =
+                Clay_CreateArenaWithCapacityAndMemory(memory_size as _, memory.as_ptr() as _);
             Clay_Initialize(arena, Clay_Dimensions { width, height });
         }
 
@@ -283,7 +284,9 @@ impl Clay {
 
         f(self);
 
-        unsafe { Clay__CloseElement(); }
+        unsafe {
+            Clay__CloseElement();
+        }
     }
 }
 
@@ -306,22 +309,27 @@ mod tests {
 
         clay.begin();
 
-        clay.with([Layout::new()
+        clay.with(
+            [
+                Layout::new()
                     .sizing_width(Sizing::Fixed(100.0))
                     .sizing_height(Sizing::Fixed(100.0))
                     .padding((10, 10))
                     .end(),
-                Rectangle::new().color((255.0, 255.0, 255.0, 0.0)).end()], |clay| 
-            {
-                clay.with([Layout::new()
+                Rectangle::new().color((255.0, 255.0, 255.0, 0.0)).end(),
+            ],
+            |clay| {
+                clay.with(
+                    [
+                        Layout::new()
                             .sizing_width(Sizing::Fixed(100.0))
                             .sizing_height(Sizing::Fixed(100.0))
                             .padding((10, 10))
                             .end(),
-                Rectangle::new().color((255.0, 255.0, 255.0, 0.0)).end()], |_clay| 
-                {
-
-                }); 
+                        Rectangle::new().color((255.0, 255.0, 255.0, 0.0)).end(),
+                    ],
+                    |_clay| {},
+                );
             },
         );
 
