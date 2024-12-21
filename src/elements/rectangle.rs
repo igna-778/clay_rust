@@ -1,8 +1,40 @@
-use std::mem::MaybeUninit;
-
-use crate::{bindings::*, TypedConfig};
+use crate::{bindings::*, mem::zeroed_init, TypedConfig};
 
 use super::ElementConfigType;
+
+pub enum RectangleCornerRadius {
+    All(f32),
+    Individual {
+        top_left: f32,
+        top_right: f32,
+        bottom_left: f32,
+        bottom_right: f32,
+    },
+}
+
+impl Into<Clay_CornerRadius> for RectangleCornerRadius {
+    fn into(self) -> Clay_CornerRadius {
+        match self {
+            RectangleCornerRadius::All(radius) => Clay_CornerRadius {
+                topLeft: radius,
+                topRight: radius,
+                bottomLeft: radius,
+                bottomRight: radius,
+            },
+            RectangleCornerRadius::Individual {
+                top_left,
+                top_right,
+                bottom_left,
+                bottom_right,
+            } => Clay_CornerRadius {
+                topLeft: top_left,
+                topRight: top_right,
+                bottomLeft: bottom_left,
+                bottomRight: bottom_right,
+            },
+        }
+    }
+}
 
 pub struct Rectangle {
     inner: Clay_RectangleElementConfig,
@@ -10,14 +42,9 @@ pub struct Rectangle {
 
 impl Rectangle {
     pub fn new() -> Self {
-        let inner = MaybeUninit::<Clay_RectangleElementConfig>::zeroed(); // Creates zero-initialized uninitialized memory
-        let inner = unsafe { inner.assume_init() };
-        Self { inner }
-    }
-
-    fn null_id() -> Clay_ElementId {
-        let inner = MaybeUninit::<Clay_ElementId>::zeroed(); // Creates zero-initialized uninitialized memory
-        unsafe { inner.assume_init() }
+        Self {
+            inner: zeroed_init(),
+        }
     }
 
     pub fn color(&mut self, color: (f32, f32, f32, f32)) -> &mut Self {
@@ -30,12 +57,17 @@ impl Rectangle {
         self
     }
 
+    pub fn corner_radius(&mut self, radius: RectangleCornerRadius) -> &mut Self {
+        self.inner.cornerRadius = radius.into();
+        self
+    }
+
     pub fn end(&self) -> TypedConfig {
         let memory = unsafe { Clay__StoreRectangleElementConfig(self.inner) };
 
         TypedConfig {
             config_memory: memory as _,
-            id: Self::null_id(),
+            id: zeroed_init(),
             config_type: ElementConfigType::Rectangle as _,
         }
     }

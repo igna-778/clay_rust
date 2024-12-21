@@ -8,11 +8,13 @@ pub mod bindings {
 #[cfg(not(feature = "build-clay"))]
 pub mod bindings;
 
-pub mod layout;
-pub mod elements;
 pub mod commands;
+pub mod elements;
+pub mod layout;
 
-use elements::ElementConfigType;
+mod mem;
+
+use elements::{text::TextElementConfig, ElementConfigType};
 
 use crate::bindings::*;
 
@@ -23,7 +25,6 @@ pub struct TypedConfig {
     pub id: Clay_ElementId,
     pub config_type: ElementConfigType,
 }
-
 
 pub struct Clay {
     // Memory used internally by clay
@@ -62,11 +63,7 @@ impl Clay {
             } else {
                 unsafe {
                     Clay__AttachElementConfig(
-                        // This isn't strictcly correct, but as this is a union of pointers
-                        // we can cast to any of them.
-                        Clay_ElementConfigUnion {
-                            rectangleElementConfig: config.config_memory as _,
-                        },
+                        std::mem::transmute(config.config_memory),
                         config.config_type as _,
                     )
                 };
@@ -80,6 +77,16 @@ impl Clay {
         unsafe {
             Clay__CloseElement();
         }
+    }
+
+    pub fn text(&self, text: &str, config: TextElementConfig) {
+        unsafe { Clay__OpenTextElement(text.into(), config.into()) };
+    }
+}
+
+impl Into<Clay_String> for &str {
+    fn into(self) -> Clay_String {
+        Clay_String { length: self.len() as _, chars: self.as_ptr() as _ }
     }
 }
 
@@ -109,17 +116,19 @@ mod tests {
                     .sizing_height(layout::Sizing::Fixed(100.0))
                     .padding((10, 10))
                     .end(),
-                elements::rectangle::Rectangle::new().color((255.0, 255.0, 255.0, 0.0)).end(),
+                elements::rectangle::Rectangle::new()
+                    .color((255.0, 255.0, 255.0, 0.0))
+                    .end(),
             ],
             |clay| {
                 clay.with(
                     [
-                        Layout::new()
-                            .sizing_width(Sizing::Fixed(100.0))
-                            .sizing_height(Sizing::Fixed(100.0))
+                        layout::Layout::new()
+                            .sizing_width(layout::Sizing::Fixed(100.0))
+                            .sizing_height(layout::Sizing::Fixed(100.0))
                             .padding((10, 10))
                             .end(),
-                        Rectangle::new().color((255.0, 255.0, 255.0, 0.0)).end(),
+                        elements::rectangle::Rectangle::new().color((255.0, 255.0, 255.0, 0.0)).end(),
                     ],
                     |_clay| {},
                 );

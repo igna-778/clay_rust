@@ -1,6 +1,4 @@
-use std::mem::MaybeUninit;
-
-use crate::{bindings::*, elements::ElementConfigType, TypedConfig};
+use crate::{bindings::*, elements::ElementConfigType, mem::zeroed_init, TypedConfig};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[repr(u8)]
@@ -85,14 +83,9 @@ pub struct Layout {
 
 impl Layout {
     pub fn new() -> Self {
-        let inner = MaybeUninit::<Clay_LayoutConfig>::zeroed(); // Creates zero-initialized uninitialized memory
-        let inner = unsafe { inner.assume_init() };
-        Self { inner }
-    }
-
-    fn null_id() -> Clay_ElementId {
-        let inner = MaybeUninit::<Clay_ElementId>::zeroed(); // Creates zero-initialized uninitialized memory
-        unsafe { inner.assume_init() }
+        Self {
+            inner: zeroed_init(),
+        }
     }
 
     pub fn sizing_width(&mut self, sizing: Sizing) -> &mut Self {
@@ -116,7 +109,7 @@ impl Layout {
 
         TypedConfig {
             config_memory: memory as _,
-            id: Self::null_id(),
+            id: zeroed_init(),
             config_type: ElementConfigType::Layout as _,
         }
     }
