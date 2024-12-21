@@ -299,6 +299,8 @@ impl Drop for Clay {
 
 #[cfg(test)]
 mod tests {
+    use std::mem;
+
     use super::*;
 
     /*
@@ -351,5 +353,14 @@ mod tests {
     fn clay_element_config_type() {
         assert_eq!(ElementConfigType::BorderContainer as c_uchar, 2 as c_uchar);
     }
+
     */
+
+    #[test]
+    fn size_of_union() {
+        assert_eq!(
+            mem::size_of::<Clay_SizingAxis__bindgen_ty_1>(),
+            mem::size_of::<Clay_SizingAxis__bindgen_ty_1>()
+        )
+    }
 }
