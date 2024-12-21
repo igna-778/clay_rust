@@ -182,7 +182,7 @@ impl Layout {
         self.inner.padding.x = padding.0;
         self.inner.padding.y = padding.1;
         self
-    } 
+    }
 
     pub fn end(&self) -> TypedConfig {
         let memory = unsafe { Clay__StoreLayoutConfig(self.inner) };
@@ -212,7 +212,12 @@ impl Rectangle {
     }
 
     pub fn color(&mut self, color: (f32, f32, f32, f32)) -> &mut Self {
-        self.inner.color = Clay_Color { r: color.0, g: color.1, b: color.2, a: color.3 };
+        self.inner.color = Clay_Color {
+            r: color.0,
+            g: color.1,
+            b: color.2,
+            a: color.3,
+        };
         self
     }
 
@@ -235,39 +240,35 @@ pub struct Clay {
 
 impl Clay {
     pub fn new(width: f32, height: f32) -> Self {
+        let memory_size = unsafe { Clay_MinMemorySize() };
+        let memory = vec![0; memory_size as usize];
+        let mem_raw = Box::into_raw(memory.into_boxed_slice()) as *const u8;
         unsafe {
-            let memory_size = Clay_MinMemorySize();
-            let memory = vec![0; memory_size as usize];
-            let mem_raw = Box::into_raw(memory.into_boxed_slice()) as *const u8;
             let arena = Clay_CreateArenaWithCapacityAndMemory(memory_size as _, mem_raw as _);
             Clay_Initialize(arena, Clay_Dimensions { width, height });
-
-            Self { mem_raw }
         }
+
+        Self { mem_raw }
     }
 
     pub fn begin(&self) {
-        unsafe {
-            Clay_BeginLayout();
-        }
+        unsafe { Clay_BeginLayout() };
     }
 
     pub fn end(&self) -> Clay_RenderCommandArray {
-        unsafe {
-            Clay_EndLayout()
-        }
+        unsafe { Clay_EndLayout() }
     }
 
     pub fn with<F: FnOnce(), const N: usize>(&self, configs: [TypedConfig; N], f: F) {
-        unsafe {
-            Clay__OpenElement();
+        unsafe { Clay__OpenElement() };
 
-            for config in configs {
-                if config.config_type == ElementConfigType::Id as _ {
-                    Clay__AttachId(config.id);
-                } else if config.config_type == ElementConfigType::Layout as _ {
-                    Clay__AttachLayoutConfig(config.config_memory as _);
-                } else {
+        for config in configs {
+            if config.config_type == ElementConfigType::Id as _ {
+                unsafe { Clay__AttachId(config.id) };
+            } else if config.config_type == ElementConfigType::Layout as _ {
+                unsafe { Clay__AttachLayoutConfig(config.config_memory as _) };
+            } else {
+                unsafe {
                     Clay__AttachElementConfig(
                         // This isn't strictcly correct, but as this is a union of pointers
                         // we can cast to any of them.
@@ -275,16 +276,16 @@ impl Clay {
                             rectangleElementConfig: config.config_memory as _,
                         },
                         config.config_type as _,
-                    );
-                }
+                    )
+                };
             }
-
-            Clay__ElementPostConfiguration();
-
-            f();
-
-            Clay__CloseElement();
         }
+
+        unsafe { Clay__ElementPostConfiguration() };
+
+        f();
+
+        unsafe { Clay__CloseElement(); }
     }
 }
 
@@ -316,22 +317,26 @@ mod tests {
 
         clay.begin();
 
-        clay.with([
-            Layout::new()
-                .sizing_width(Sizing::Fixed(100.0))
-                .sizing_height(Sizing::Fixed(100.0))
-                .padding((10, 10))
-                .end(),
-            Rectangle::new()
-                .color((255.0, 255.0, 255.0, 0.0))
-                .end()], || {
+        clay.with(
+            [
+                Layout::new()
+                    .sizing_width(Sizing::Fixed(100.0))
+                    .sizing_height(Sizing::Fixed(100.0))
+                    .padding((10, 10))
+                    .end(),
+                Rectangle::new().color((255.0, 255.0, 255.0, 0.0)).end(),
+            ],
+            || {
 
-            // do nothing
-        });
+                // do nothing
+            },
+        );
 
         // TODO: Cleanup
         let render_array = clay.end();
-        let items = unsafe { std::slice::from_raw_parts(render_array.internalArray, render_array.length as _) }; 
+        let items = unsafe {
+            std::slice::from_raw_parts(render_array.internalArray, render_array.length as _)
+        };
 
         for item in items {
             if item.commandType == RenderCommandType::Rectangle as _ {
