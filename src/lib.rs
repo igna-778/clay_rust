@@ -3,8 +3,9 @@
 #![allow(non_snake_case)]
 mod bindings;
 
+use std::os::raw::{c_uchar, c_uint};
+
 use bindings::*;
-use libc::{c_uchar, c_uint};
 
 // include!(concat!(env!("OUT_DIR"), "/bindings.rs"));
 
@@ -83,6 +84,24 @@ impl ClayLayoutAlignmentY {
             ClayLayoutAlignmentY::Top => Clay_LayoutAlignmentY_CLAY_ALIGN_Y_TOP,
             ClayLayoutAlignmentY::Center => Clay_LayoutAlignmentY_CLAY_ALIGN_Y_CENTER,
             ClayLayoutAlignmentY::Bottom => Clay_LayoutAlignmentY_CLAY_ALIGN_Y_BOTTOM,
+        }
+    }
+}
+
+pub enum ClaySizingType {
+    Fit,
+    Grow,
+    Percent,
+    Fixed,
+}
+
+impl ClaySizingType {
+    pub fn as_c_uchar(&self) -> c_uchar {
+        match self {
+            ClaySizingType::Fit => Clay__SizingType_CLAY__SIZING_TYPE_FIT,
+            ClaySizingType::Grow => Clay__SizingType_CLAY__SIZING_TYPE_GROW,
+            ClaySizingType::Percent => Clay__SizingType_CLAY__SIZING_TYPE_PERCENT,
+            ClaySizingType::Fixed => Clay__SizingType_CLAY__SIZING_TYPE_FIXED,
         }
     }
 }
