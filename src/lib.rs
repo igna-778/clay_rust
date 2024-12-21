@@ -95,12 +95,48 @@ pub enum FloatingAttachPointType {
     RightCenter = Clay_FloatingAttachPointType_CLAY_ATTACH_POINT_RIGHT_CENTER,
     RightBottom = Clay_FloatingAttachPointType_CLAY_ATTACH_POINT_RIGHT_BOTTOM,
 }
-pub enum ClaySize{
-    MinMax(Clay_SizingMinMax),
-    Percent(f32)
+
+pub struct SizingAxis {
+    inner: Clay_SizingAxis,
 }
+impl SizingAxis {
+    fn new(value: SizingAxisValue, sizing_type: SizingType) -> Self {
+        SizingAxis {
+            inner: Clay_SizingAxis {
+                __bindgen_anon_1: match value {
+                    SizingAxisValue::MinMax(mm) => Clay_SizingAxis__bindgen_ty_1 {
+                        sizeMinMax: mm.inner,
+                    },
+                    SizingAxisValue::Percent(val) => {
+                        Clay_SizingAxis__bindgen_ty_1 { sizePercent: val }
+                    }
+                },
+                type_: sizing_type as c_uchar,
+            },
+        }
+    }
+}
+
+pub struct SizingMinMax {
+    pub(crate) inner: Clay_SizingMinMax,
+}
+impl SizingMinMax {
+    fn get_min(&self) -> f32 {
+        self.inner.min
+    }
+    fn get_max(&self) -> f32 {
+        self.inner.max
+    }
+}
+pub enum SizingAxisValue {
+    MinMax(SizingMinMax),
+    Percent(f32),
+}
+
 #[cfg(test)]
 mod tests {
+    use std::mem;
+
     use super::*;
     #[test]
     fn clay_floating_attach_point_type() {
@@ -109,5 +145,12 @@ mod tests {
     #[test]
     fn clay_element_config_type() {
         assert_eq!(ElementConfigType::BorderContainer as c_uchar, 2 as c_uchar);
+    }
+    #[test]
+    fn size_of_union() {
+        assert_eq!(
+            mem::size_of::<Clay_SizingAxis__bindgen_ty_1>(),
+            mem::size_of::<Clay_SizingAxis__bindgen_ty_1>()
+        )
     }
 }
