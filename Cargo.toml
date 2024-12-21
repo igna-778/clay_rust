@@ -4,11 +4,11 @@ version = "0.1.0"
 edition = "2021"
 
 [build-dependencies]
-bindgen = "0.71.1"
 cc = "1.0"
+bindgen = { version = "0.71.1", optional = true }
 
 [features]
 default = []
 
 # Activating this feature will use the built bindings instead of the static included ones
-build-clay = []
+build-clay = [ "dep:bindgen" ]
