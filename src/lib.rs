@@ -258,7 +258,7 @@ impl Clay {
         }
     }
 
-    pub fn with<F: FnOnce()>(&self, configs: &[TypedConfig], f: F) {
+    pub fn with<F: FnOnce(), const N: usize>(&self, configs: [TypedConfig; N], f: F) {
         unsafe {
             Clay__OpenElement();
 
@@ -314,7 +314,7 @@ mod tests {
 
         clay.begin();
 
-        clay.with(&[
+        clay.with([
             Layout::new()
                 .sizing_width(Sizing::Fixed(100.0))
                 .sizing_height(Sizing::Fixed(100.0))
