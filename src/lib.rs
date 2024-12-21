@@ -79,12 +79,12 @@ impl Clay {
         }
     }
 
-    pub fn text(&self, text: String, config: TextElementConfig) {
+    pub fn text(&self, text: &str, config: TextElementConfig) {
         unsafe { Clay__OpenTextElement(text.into(), config.into()) };
     }
 }
 
-impl Into<Clay_String> for String {
+impl Into<Clay_String> for &str {
     fn into(self) -> Clay_String {
         Clay_String { length: self.len() as _, chars: self.as_ptr() as _ }
     }
