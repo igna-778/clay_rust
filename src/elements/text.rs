@@ -48,12 +48,12 @@ impl Text {
         self.inner.fontId = id;
         self
     }
-    
+
     pub fn letter_spacing(&mut self, spacing: u16) -> &mut Self {
         self.inner.letterSpacing = spacing;
         self
     }
-    
+
     pub fn line_height(&mut self, height: u16) -> &mut Self {
         self.inner.lineHeight = height;
         self

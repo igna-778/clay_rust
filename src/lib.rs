@@ -11,6 +11,7 @@ pub mod bindings;
 pub mod commands;
 pub mod elements;
 pub mod layout;
+pub mod math;
 
 mod mem;
 
@@ -86,7 +87,10 @@ impl Clay {
 
 impl Into<Clay_String> for &str {
     fn into(self) -> Clay_String {
-        Clay_String { length: self.len() as _, chars: self.as_ptr() as _ }
+        Clay_String {
+            length: self.len() as _,
+            chars: self.as_ptr() as _,
+        }
     }
 }
 
@@ -128,7 +132,9 @@ mod tests {
                             .sizing_height(layout::Sizing::Fixed(100.0))
                             .padding((10, 10))
                             .end(),
-                        elements::rectangle::Rectangle::new().color((255.0, 255.0, 255.0, 0.0)).end(),
+                        elements::rectangle::Rectangle::new()
+                            .color((255.0, 255.0, 255.0, 0.0))
+                            .end(),
                     ],
                     |_clay| {},
                 );

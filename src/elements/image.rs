@@ -1,8 +1,8 @@
 use std::{ffi::c_void, marker::PhantomData};
 
-use crate::{bindings::*, mem::zeroed_init, TypedConfig};
+use crate::{bindings::*, math::Dimensions, mem::zeroed_init, TypedConfig};
 
-use super::{Dimensions, ElementConfigType};
+use super::ElementConfigType;
 
 pub struct Image<Data> {
     inner: Clay_ImageElementConfig,
@@ -13,7 +13,7 @@ impl<Data> Image<Data> {
     pub fn new() -> Self {
         Self {
             inner: zeroed_init(),
-            phantom: PhantomData::default()
+            phantom: PhantomData,
         }
     }
 
