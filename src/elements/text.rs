@@ -1,4 +1,4 @@
-use crate::{bindings::*, mem::zeroed_init};
+use crate::{bindings::*, color::Color, mem::zeroed_init};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[repr(u32)]
@@ -29,13 +29,8 @@ impl Text {
         }
     }
 
-    pub fn color(&mut self, color: (f32, f32, f32, f32)) -> &mut Self {
-        self.inner.textColor = Clay_Color {
-            r: color.0,
-            g: color.1,
-            b: color.2,
-            a: color.3,
-        };
+    pub fn color(&mut self, color: Color) -> &mut Self {
+        self.inner.textColor = color.into();
         self
     }
 

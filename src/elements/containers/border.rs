@@ -1,5 +1,6 @@
 use crate::{
     bindings::*,
+    color::Color,
     elements::{CornerRadius, ElementConfigType},
     mem::zeroed_init,
     TypedConfig,
@@ -16,45 +17,40 @@ impl BorderContainer {
         }
     }
 
-    fn into_clay_border(width: u32, color: (f32, f32, f32, f32)) -> Clay_Border {
+    fn into_clay_border(width: u32, color: Color) -> Clay_Border {
         Clay_Border {
             width,
-            color: Clay_Color {
-                r: color.0,
-                g: color.1,
-                b: color.2,
-                a: color.3,
-            },
+            color: color.into(),
         }
     }
 
-    pub fn left(&mut self, width: u32, color: (f32, f32, f32, f32)) -> &mut Self {
+    pub fn left(&mut self, width: u32, color: Color) -> &mut Self {
         self.inner.left = Self::into_clay_border(width, color);
         self
     }
-    pub fn right(&mut self, width: u32, color: (f32, f32, f32, f32)) -> &mut Self {
+    pub fn right(&mut self, width: u32, color: Color) -> &mut Self {
         self.inner.right = Self::into_clay_border(width, color);
         self
     }
-    pub fn top(&mut self, width: u32, color: (f32, f32, f32, f32)) -> &mut Self {
+    pub fn top(&mut self, width: u32, color: Color) -> &mut Self {
         self.inner.top = Self::into_clay_border(width, color);
         self
     }
-    pub fn bottom(&mut self, width: u32, color: (f32, f32, f32, f32)) -> &mut Self {
+    pub fn bottom(&mut self, width: u32, color: Color) -> &mut Self {
         self.inner.bottom = Self::into_clay_border(width, color);
         self
     }
-    pub fn between_childs(&mut self, width: u32, color: (f32, f32, f32, f32)) -> &mut Self {
+    pub fn between_childs(&mut self, width: u32, color: Color) -> &mut Self {
         self.inner.betweenChildren = Self::into_clay_border(width, color);
         self
     }
-    pub fn all_directions(&mut self, width: u32, color: (f32, f32, f32, f32)) -> &mut Self {
+    pub fn all_directions(&mut self, width: u32, color: Color) -> &mut Self {
         self.left(width, color)
             .right(width, color)
             .top(width, color)
             .bottom(width, color)
     }
-    pub fn all(&mut self, width: u32, color: (f32, f32, f32, f32)) -> &mut Self {
+    pub fn all(&mut self, width: u32, color: Color) -> &mut Self {
         self.all_directions(width, color)
             .between_childs(width, color)
     }

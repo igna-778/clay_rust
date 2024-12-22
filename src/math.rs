@@ -1,6 +1,6 @@
 use crate::bindings::*;
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 #[repr(C)]
 pub struct Vector2 {
     x: f32,
@@ -18,7 +18,7 @@ impl From<Vector2> for Clay_Vector2 {
     }
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 #[repr(C)]
 pub struct Dimensions {
     width: f32,

@@ -8,10 +8,11 @@ pub mod bindings {
 #[cfg(not(feature = "build-clay"))]
 pub mod bindings;
 
-pub mod render_commands;
+pub mod color;
 pub mod elements;
 pub mod layout;
 pub mod math;
+pub mod render_commands;
 
 mod mem;
 
@@ -98,6 +99,8 @@ impl Into<Clay_String> for &str {
 mod tests {
     use std::mem;
 
+    use color::Color;
+
     use super::*;
 
     /*
@@ -121,7 +124,7 @@ mod tests {
                     .padding((10, 10))
                     .end(),
                 elements::rectangle::Rectangle::new()
-                    .color((255.0, 255.0, 255.0, 0.0))
+                    .color(Color::rgb(255., 255., 255.))
                     .end(),
             ],
             |clay| {
@@ -133,7 +136,7 @@ mod tests {
                             .padding((10, 10))
                             .end(),
                         elements::rectangle::Rectangle::new()
-                            .color((255.0, 255.0, 255.0, 0.0))
+                            .color(Color::rgb(255., 255., 255.))
                             .end(),
                     ],
                     |_clay| {},
