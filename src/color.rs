@@ -16,6 +16,13 @@ impl Color {
     pub fn rgba(r: f32, g: f32, b: f32, a: f32) -> Self {
         Self { r, g, b, a }
     }
+
+    pub fn u_rgb(r: u8, g: u8, b: u8) -> Self {
+        Self::rgb(r as _, g as _, b as _)
+    }
+    pub fn u_rgba(r: u8, g: u8, b: u8, a: u8) -> Self {
+        Self::rgba(r as _, g as _, b as _, a as _)
+    }
 }
 
 impl From<Clay_Color> for Color {
