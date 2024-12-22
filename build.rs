@@ -11,11 +11,13 @@ fn main() {
     {
         use std::fs;
 
-        let clay_repo_path = PathBuf::from("clay/clay.h")
+        let env_provided_path = env::var("CLAY_HEADER_PATH").unwrap_or("clay/clay.h".to_string());
+
+        let clay_repo_path = PathBuf::from(env_provided_path)
             .canonicalize()
-            .expect("Cannot canonicalize clay.h repository path");
+            .expect("Cannot canonicalize clay.h path\nEather clone the clay repository at the root of the projet, or set the `CLAY_HEADER_PATH` to a valid clay.h file");
         
-        fs::copy(clay_repo_path, &clay_path).expect("Failed to copy clay.h from repo to root");
+        fs::copy(clay_repo_path, &clay_path).expect("Failed to copy clay.h from repo to root\nEather clone the clay repository at the root of the projet, or set the `CLAY_HEADER_PATH` to a valid clay.h file");
     }
 
     let mut cc_builder = cc::Build::new();
