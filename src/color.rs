@@ -17,9 +17,11 @@ impl Color {
         Self { r, g, b, a }
     }
 
+    /// Allows using hex values to build colors
     pub fn u_rgb(r: u8, g: u8, b: u8) -> Self {
         Self::rgb(r as _, g as _, b as _)
     }
+    /// Allows using hex values to build colors
     pub fn u_rgba(r: u8, g: u8, b: u8, a: u8) -> Self {
         Self::rgba(r as _, g as _, b as _, a as _)
     }
