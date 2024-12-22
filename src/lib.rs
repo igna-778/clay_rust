@@ -8,7 +8,7 @@ pub mod bindings {
 #[cfg(not(feature = "build-clay"))]
 pub mod bindings;
 
-pub mod commands;
+pub mod render_commands;
 pub mod elements;
 pub mod layout;
 pub mod math;
@@ -148,7 +148,7 @@ mod tests {
         };
 
         for item in items {
-            if item.commandType == commands::RenderCommandType::Rectangle as _ {
+            if item.commandType == render_commands::RenderCommandType::Rectangle as _ {
                 let rectangle = unsafe { item.config.rectangleElementConfig };
                 unsafe {
                     println!("{:?}", ((*rectangle).cornerRadius));
