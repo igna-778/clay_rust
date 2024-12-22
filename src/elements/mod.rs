@@ -28,20 +28,36 @@ pub enum PointerCaptureMode {
     Passthrough = Clay_PointerCaptureMode_CLAY_POINTER_CAPTURE_MODE_PASSTHROUGH,
 }
 
-#[derive(Debug, Clone, PartialEq)]
-#[repr(C)]
-pub struct Dimensions {
-    width: f32,
-    height: f32
+pub enum CornerRadius {
+    All(f32),
+    Individual {
+        top_left: f32,
+        top_right: f32,
+        bottom_left: f32,
+        bottom_right: f32,
+    },
 }
 
-impl From<Clay_Dimensions> for Dimensions {
-    fn from(value: Clay_Dimensions) -> Self {
-        unsafe { std::mem::transmute(value) }
-    }
-}
-impl From<Dimensions> for Clay_Dimensions {
-    fn from(value: Dimensions) -> Self {
-        unsafe { std::mem::transmute(value) }
+impl Into<Clay_CornerRadius> for CornerRadius {
+    fn into(self) -> Clay_CornerRadius {
+        match self {
+            CornerRadius::All(radius) => Clay_CornerRadius {
+                topLeft: radius,
+                topRight: radius,
+                bottomLeft: radius,
+                bottomRight: radius,
+            },
+            CornerRadius::Individual {
+                top_left,
+                top_right,
+                bottom_left,
+                bottom_right,
+            } => Clay_CornerRadius {
+                topLeft: top_left,
+                topRight: top_right,
+                bottomLeft: bottom_left,
+                bottomRight: bottom_right,
+            },
+        }
     }
 }

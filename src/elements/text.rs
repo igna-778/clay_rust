@@ -1,4 +1,4 @@
-use crate::{bindings::*, mem::zeroed_init};
+use crate::{bindings::*, color::Color, mem::zeroed_init};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[repr(u32)]
@@ -29,13 +29,8 @@ impl Text {
         }
     }
 
-    pub fn color(&mut self, color: (f32, f32, f32, f32)) -> &mut Self {
-        self.inner.textColor = Clay_Color {
-            r: color.0,
-            g: color.1,
-            b: color.2,
-            a: color.3,
-        };
+    pub fn color(&mut self, color: Color) -> &mut Self {
+        self.inner.textColor = color.into();
         self
     }
 
@@ -48,12 +43,12 @@ impl Text {
         self.inner.fontId = id;
         self
     }
-    
+
     pub fn letter_spacing(&mut self, spacing: u16) -> &mut Self {
         self.inner.letterSpacing = spacing;
         self
     }
-    
+
     pub fn line_height(&mut self, height: u16) -> &mut Self {
         self.inner.lineHeight = height;
         self

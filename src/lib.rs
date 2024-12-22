@@ -8,9 +8,11 @@ pub mod bindings {
 #[cfg(not(feature = "build-clay"))]
 pub mod bindings;
 
-pub mod commands;
+pub mod color;
 pub mod elements;
 pub mod layout;
+pub mod math;
+pub mod render_commands;
 
 mod mem;
 
@@ -86,13 +88,19 @@ impl Clay {
 
 impl Into<Clay_String> for &str {
     fn into(self) -> Clay_String {
-        Clay_String { length: self.len() as _, chars: self.as_ptr() as _ }
+        Clay_String {
+            length: self.len() as _,
+            chars: self.as_ptr() as _,
+        }
     }
 }
 
 #[cfg(test)]
 mod tests {
     use std::mem;
+
+    use color::Color;
+    use elements::text::Text;
 
     use super::*;
 
@@ -117,7 +125,7 @@ mod tests {
                     .padding((10, 10))
                     .end(),
                 elements::rectangle::Rectangle::new()
-                    .color((255.0, 255.0, 255.0, 0.0))
+                    .color(Color::rgb(255., 255., 255.))
                     .end(),
             ],
             |clay| {
@@ -128,12 +136,37 @@ mod tests {
                             .sizing_height(layout::Sizing::Fixed(100.0))
                             .padding((10, 10))
                             .end(),
-                        elements::rectangle::Rectangle::new().color((255.0, 255.0, 255.0, 0.0)).end(),
+                        elements::rectangle::Rectangle::new()
+                            .color(Color::rgb(255., 255., 255.))
+                            .end(),
                     ],
                     |_clay| {},
                 );
+                // THIS FAILS
+                // clay.text("test", Text::new().color(Color::rgb(255., 255., 255.)).font_size(24).end());
             },
         );
+        clay.with([
+            layout::Layout::new()
+                .padding((16, 16)).end(),
+            elements::containers::border::BorderContainer::new()
+                .all_directions(2, Color::rgb(255., 255., 0.))
+                .corner_radius(elements::CornerRadius::All(25.))
+                .end()
+        ], |_clay| {
+            clay.with(
+                [
+                    layout::Layout::new()
+                        .sizing_width(layout::Sizing::Fixed(50.0))
+                        .sizing_height(layout::Sizing::Fixed(50.0))
+                        .end(),
+                    elements::rectangle::Rectangle::new()
+                        .color(Color::rgb(0., 255., 255.))
+                        .end(),
+                ],
+                |_clay| {},
+            );
+        });
 
         // TODO: Cleanup
         let render_array = clay.end();
@@ -142,7 +175,8 @@ mod tests {
         };
 
         for item in items {
-            if item.commandType == commands::RenderCommandType::Rectangle as _ {
+            println!("x:{}, y:{}, width:{}, height:{}, type:{}", item.boundingBox.x, item.boundingBox.y, item.boundingBox.width, item.boundingBox.height, item.commandType);
+            if item.commandType == render_commands::RenderCommandType::Rectangle as _ {
                 let rectangle = unsafe { item.config.rectangleElementConfig };
                 unsafe {
                     println!("{:?}", ((*rectangle).cornerRadius));
