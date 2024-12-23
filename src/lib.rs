@@ -1,9 +1,4 @@
-#![allow(non_upper_case_globals)]
-#![allow(non_camel_case_types)]
-#![allow(non_snake_case)]
-pub mod bindings {
-    include!(concat!(env!("OUT_DIR"), "/bindings.rs"));
-}
+pub mod bindings;
 
 pub mod color;
 pub mod elements;
@@ -143,27 +138,29 @@ mod tests {
                 // clay.text("test", Text::new().color(Color::rgb(255., 255., 255.)).font_size(24).end());
             },
         );
-        clay.with([
-            layout::Layout::new()
-                .padding((16, 16)).end(),
-            elements::containers::border::BorderContainer::new()
-                .all_directions(2, Color::rgb(255., 255., 0.))
-                .corner_radius(elements::CornerRadius::All(25.))
-                .end()
-        ], |_clay| {
-            clay.with(
-                [
-                    layout::Layout::new()
-                        .sizing_width(layout::Sizing::Fixed(50.0))
-                        .sizing_height(layout::Sizing::Fixed(50.0))
-                        .end(),
-                    elements::rectangle::Rectangle::new()
-                        .color(Color::rgb(0., 255., 255.))
-                        .end(),
-                ],
-                |_clay| {},
-            );
-        });
+        clay.with(
+            [
+                layout::Layout::new().padding((16, 16)).end(),
+                elements::containers::border::BorderContainer::new()
+                    .all_directions(2, Color::rgb(255., 255., 0.))
+                    .corner_radius(elements::CornerRadius::All(25.))
+                    .end(),
+            ],
+            |_clay| {
+                clay.with(
+                    [
+                        layout::Layout::new()
+                            .sizing_width(layout::Sizing::Fixed(50.0))
+                            .sizing_height(layout::Sizing::Fixed(50.0))
+                            .end(),
+                        elements::rectangle::Rectangle::new()
+                            .color(Color::rgb(0., 255., 255.))
+                            .end(),
+                    ],
+                    |_clay| {},
+                );
+            },
+        );
 
         // TODO: Cleanup
         let render_array = clay.end();
@@ -172,7 +169,14 @@ mod tests {
         };
 
         for item in items {
-            println!("x:{}, y:{}, width:{}, height:{}, type:{}", item.boundingBox.x, item.boundingBox.y, item.boundingBox.width, item.boundingBox.height, item.commandType);
+            println!(
+                "x:{}, y:{}, width:{}, height:{}, type:{}",
+                item.boundingBox.x,
+                item.boundingBox.y,
+                item.boundingBox.width,
+                item.boundingBox.height,
+                item.commandType
+            );
             if item.commandType == render_commands::RenderCommandType::Rectangle as _ {
                 let rectangle = unsafe { item.config.rectangleElementConfig };
                 unsafe {

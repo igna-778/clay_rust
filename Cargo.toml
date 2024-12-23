@@ -10,9 +10,5 @@ bindgen = "0.71.1"
 [features]
 default = []
 
-# Activating this feature will use the built bindings instead of the static included ones
-build-clay = []
-
-disable-culling = []
 wasm = []
 debug = []
