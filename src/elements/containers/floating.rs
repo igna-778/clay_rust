@@ -1,6 +1,7 @@
 use crate::{
     bindings::*,
     elements::{ElementConfigType, PointerCaptureMode},
+    id::Id,
     math::{Dimensions, Vector2},
     mem::zeroed_init,
     TypedConfig,
@@ -22,13 +23,20 @@ pub enum FloatingAttachPointType {
 
 pub struct FloatingContainer {
     inner: Clay_FloatingElementConfig,
+    id: Id,
 }
 
 impl FloatingContainer {
     pub fn new() -> Self {
         Self {
             inner: zeroed_init(),
+            id: Id::default(),
         }
+    }
+
+    pub fn attach(&mut self, id: Id) -> &mut Self {
+        self.id = id;
+        self
     }
 
     pub fn offset(&mut self, offset: Vector2) -> &mut Self {
@@ -73,7 +81,7 @@ impl FloatingContainer {
 
         TypedConfig {
             config_memory: memory as _,
-            id: zeroed_init(),
+            id: self.id.into(),
             config_type: ElementConfigType::FloatingContainer as _,
         }
     }

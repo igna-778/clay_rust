@@ -2,6 +2,7 @@ pub mod bindings;
 
 pub mod color;
 pub mod elements;
+pub mod id;
 pub mod layout;
 pub mod math;
 pub mod render_commands;
