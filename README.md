@@ -14,7 +14,7 @@ Rust bindings for [Clay](https://github.com/nicbarker/clay), a UI layout library
     - (X) Floating Container
     - (X) Border Container
     - (X) Scroll Container
-    - ( ) Custom Elements
+    - (X) Custom Elements
 - ( ) Text Measuring
 - ( ) Element Ids
 - ( ) Interactions
