@@ -21,13 +21,6 @@ pub enum ElementConfigType {
     Layout = 66,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
-#[repr(u32)]
-pub enum PointerCaptureMode {
-    Capture = Clay_PointerCaptureMode_CLAY_POINTER_CAPTURE_MODE_CAPTURE,
-    Passthrough = Clay_PointerCaptureMode_CLAY_POINTER_CAPTURE_MODE_PASSTHROUGH,
-}
-
 pub enum CornerRadius {
     All(f32),
     Individual {

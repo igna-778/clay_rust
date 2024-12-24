@@ -1,6 +1,6 @@
 use crate::{
     bindings::*,
-    elements::{ElementConfigType, PointerCaptureMode},
+    elements::ElementConfigType,
     id::Id,
     math::{Dimensions, Vector2},
     mem::zeroed_init,
@@ -19,6 +19,13 @@ pub enum FloatingAttachPointType {
     RightTop = Clay_FloatingAttachPointType_CLAY_ATTACH_POINT_RIGHT_TOP,
     RightCenter = Clay_FloatingAttachPointType_CLAY_ATTACH_POINT_RIGHT_CENTER,
     RightBottom = Clay_FloatingAttachPointType_CLAY_ATTACH_POINT_RIGHT_BOTTOM,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+#[repr(u32)]
+pub enum PointerCaptureMode {
+    Capture = Clay_PointerCaptureMode_CLAY_POINTER_CAPTURE_MODE_CAPTURE,
+    Passthrough = Clay_PointerCaptureMode_CLAY_POINTER_CAPTURE_MODE_PASSTHROUGH,
 }
 
 pub struct FloatingContainer {
