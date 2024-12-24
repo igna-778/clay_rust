@@ -1,10 +1,16 @@
 use crate::bindings::*;
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, Default)]
 #[repr(C)]
 pub struct Vector2 {
     x: f32,
     y: f32,
+}
+
+impl Vector2 {
+    pub fn new(x: f32, y: f32) -> Self {
+        Self { x, y }
+    }
 }
 
 impl From<Clay_Vector2> for Vector2 {
@@ -18,11 +24,17 @@ impl From<Vector2> for Clay_Vector2 {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, Default)]
 #[repr(C)]
 pub struct Dimensions {
     width: f32,
     height: f32,
+}
+
+impl Dimensions {
+    pub fn new(width: f32, height: f32) -> Self {
+        Self { width, height }
+    }
 }
 
 impl From<Clay_Dimensions> for Dimensions {
