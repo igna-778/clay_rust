@@ -106,11 +106,22 @@ impl Clay {
     }
 }
 
-impl Into<Clay_String> for &str {
-    fn into(self) -> Clay_String {
-        Clay_String {
-            length: self.len() as _,
-            chars: self.as_ptr() as _,
+
+impl From<&str> for Clay_String {
+    fn from(value: &str) -> Self {
+        Self {
+            length: value.len() as _,
+            chars: value.as_ptr() as _,
+        }
+    }
+}
+impl From<Clay_String> for &str {
+    fn from(value: Clay_String) -> Self {
+        unsafe {
+            std::str::from_utf8_unchecked(std::slice::from_raw_parts(
+                value.chars as *const u8,
+                value.length as _,
+            ))
         }
     }
 }

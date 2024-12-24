@@ -27,8 +27,8 @@ impl Default for Id {
     }
 }
 
-impl Into<Clay_ElementId> for Id {
-    fn into(self) -> Clay_ElementId {
-        self.inner
+impl From<Id> for Clay_ElementId {
+    fn from(value: Id) -> Self {
+        value.inner
     }
 }

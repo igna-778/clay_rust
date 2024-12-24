@@ -47,3 +47,34 @@ impl From<Dimensions> for Clay_Dimensions {
         unsafe { std::mem::transmute(value) }
     }
 }
+
+#[derive(Debug, Clone, Copy, PartialEq, Default)]
+#[repr(C)]
+pub struct BoundingBox {
+    x: f32,
+    y: f32,
+    width: f32,
+    height: f32,
+}
+
+impl BoundingBox {
+    pub fn new(x: f32, y: f32, width: f32, height: f32) -> Self {
+        Self {
+            x,
+            y,
+            width,
+            height,
+        }
+    }
+}
+
+impl From<Clay_BoundingBox> for BoundingBox {
+    fn from(value: Clay_BoundingBox) -> Self {
+        unsafe { std::mem::transmute(value) }
+    }
+}
+impl From<BoundingBox> for Clay_BoundingBox {
+    fn from(value: BoundingBox) -> Self {
+        unsafe { std::mem::transmute(value) }
+    }
+}
