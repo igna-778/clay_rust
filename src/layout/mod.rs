@@ -1,116 +1,91 @@
+use alignment::{Alignment, LayoutAlignmentX, LayoutAlignmentY};
+use padding::Padding;
+use sizing::Sizing;
+
 use crate::{bindings::*, elements::ElementConfigType, mem::zeroed_init, TypedConfig};
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+pub mod alignment;
+pub mod padding;
+pub mod sizing;
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
 pub enum LayoutDirection {
     LeftToRight = Clay_LayoutDirection_CLAY_LEFT_TO_RIGHT,
     TopToBottom = Clay_LayoutDirection_CLAY_TOP_TO_BOTTOM,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
-#[repr(u8)]
-pub enum LayoutAlignmentX {
-    Left = Clay_LayoutAlignmentX_CLAY_ALIGN_X_LEFT,
-    Center = Clay_LayoutAlignmentX_CLAY_ALIGN_X_CENTER,
-    Right = Clay_LayoutAlignmentX_CLAY_ALIGN_X_RIGHT,
-}
-
-#[derive(Debug, Clone, PartialEq, Eq)]
-#[repr(u8)]
-pub enum LayoutAlignmentY {
-    Top = Clay_LayoutAlignmentY_CLAY_ALIGN_Y_TOP,
-    Center = Clay_LayoutAlignmentY_CLAY_ALIGN_Y_CENTER,
-    Bottom = Clay_LayoutAlignmentY_CLAY_ALIGN_Y_BOTTOM,
-}
-
-#[derive(Debug, Clone, PartialEq, Eq)]
-#[repr(u8)]
-pub enum SizingType {
-    Fit = Clay__SizingType_CLAY__SIZING_TYPE_FIT,
-    Grow = Clay__SizingType_CLAY__SIZING_TYPE_GROW,
-    Percent = Clay__SizingType_CLAY__SIZING_TYPE_PERCENT,
-    Fixed = Clay__SizingType_CLAY__SIZING_TYPE_FIXED,
-}
-
-#[derive(Debug, Clone, PartialEq)]
-pub enum Sizing {
-    Fit(f32, f32),
-    Grow(f32, f32),
-    Fixed(f32),
-    Percent(f32),
-}
-
-impl From<Sizing> for Clay_SizingAxis {
-    fn from(value: Sizing) -> Self {
-        match value {
-            Sizing::Fit(min, max) => Self {
-                type_: SizingType::Fit as _,
-                __bindgen_anon_1: Clay_SizingAxis__bindgen_ty_1 {
-                    sizeMinMax: Clay_SizingMinMax { min, max },
-                },
-            },
-
-            Sizing::Grow(min, max) => Self {
-                type_: SizingType::Grow as _,
-                __bindgen_anon_1: Clay_SizingAxis__bindgen_ty_1 {
-                    sizeMinMax: Clay_SizingMinMax { min, max },
-                },
-            },
-
-            Sizing::Fixed(size) => Self {
-                type_: SizingType::Fixed as _,
-                __bindgen_anon_1: Clay_SizingAxis__bindgen_ty_1 {
-                    sizeMinMax: Clay_SizingMinMax {
-                        min: size,
-                        max: size,
-                    },
-                },
-            },
-
-            Sizing::Percent(percent) => Self {
-                type_: SizingType::Percent as _,
-                __bindgen_anon_1: Clay_SizingAxis__bindgen_ty_1 {
-                    sizePercent: percent,
-                },
-            },
-        }
-    }
-}
-
+#[derive(Debug, Copy, Clone)]
 pub struct Layout {
-    inner: Clay_LayoutConfig,
+    pub width: Sizing,
+    pub height: Sizing,
+    pub padding: Padding,
+    pub child_gap: u16,
+    pub child_alignment: Alignment,
+    pub direction: LayoutDirection,
 }
 
 impl Layout {
     pub fn new() -> Self {
         Self {
-            inner: zeroed_init(),
+            width: Sizing::Fit(0., f32::MAX),
+            height: Sizing::Fit(0., f32::MAX),
+            padding: Padding::default(),
+            child_gap: 0,
+            child_alignment: Alignment::new(LayoutAlignmentX::Left, LayoutAlignmentY::Top),
+            direction: LayoutDirection::LeftToRight,
         }
     }
 
-    pub fn sizing_width(&mut self, sizing: Sizing) -> &mut Self {
-        self.inner.sizing.width = sizing.into();
+    pub fn width(&mut self, width: Sizing) -> &mut Self {
+        self.width = width.into();
         self
     }
 
-    pub fn sizing_height(&mut self, sizing: Sizing) -> &mut Self {
-        self.inner.sizing.height = sizing.into();
+    pub fn height(&mut self, height: Sizing) -> &mut Self {
+        self.height = height.into();
         self
     }
 
-    pub fn padding(&mut self, padding: (u16, u16)) -> &mut Self {
-        self.inner.padding.x = padding.0;
-        self.inner.padding.y = padding.1;
+    pub fn padding(&mut self, padding: Padding) -> &mut Self {
+        self.padding = padding;
         self
     }
 
     pub fn end(&self) -> TypedConfig {
-        let memory = unsafe { Clay__StoreLayoutConfig(self.inner) };
+        let memory = unsafe { Clay__StoreLayoutConfig((*self).into()) };
 
         TypedConfig {
             config_memory: memory as _,
             id: zeroed_init(),
             config_type: ElementConfigType::Layout as _,
+        }
+    }
+}
+
+impl From<Clay_LayoutConfig> for Layout {
+    fn from(value: Clay_LayoutConfig) -> Self {
+        Self {
+            width: value.sizing.width.into(),
+            height: value.sizing.height.into(),
+            padding: value.padding.into(),
+            child_gap: value.childGap,
+            child_alignment: value.childAlignment.into(),
+            direction: unsafe { core::mem::transmute(value.layoutDirection) },
+        }
+    }
+}
+impl From<Layout> for Clay_LayoutConfig {
+    fn from(value: Layout) -> Self {
+        Self {
+            sizing: Clay_Sizing {
+                width: value.width.into(),
+                height: value.height.into(),
+            },
+            padding: value.padding.into(),
+            childGap: value.child_gap,
+            childAlignment: value.child_alignment.into(),
+            layoutDirection: value.direction as _,
         }
     }
 }

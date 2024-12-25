@@ -3,53 +3,87 @@ use crate::{
     color::Color,
     elements::{CornerRadius, ElementConfigType},
     id::Id,
-    mem::zeroed_init,
     TypedConfig,
 };
 
+#[derive(Debug, Clone, Copy)]
+pub struct Border {
+    width: u32,
+    color: Color,
+}
+
+impl Border {
+    pub fn new(width: u32, color: Color) -> Self {
+        Self { width, color }
+    }
+}
+
+impl Default for Border {
+    fn default() -> Self {
+        Self {
+            width: 0,
+            color: Color::rgba(0., 0., 0., 0.),
+        }
+    }
+}
+
+impl From<Clay_Border> for Border {
+    fn from(value: Clay_Border) -> Self {
+        Self {
+            width: value.width,
+            color: value.color.into(),
+        }
+    }
+}
+impl From<Border> for Clay_Border {
+    fn from(value: Border) -> Self {
+        Self {
+            width: value.width,
+            color: value.color.into(),
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
 pub struct BorderContainer {
-    inner: Clay_BorderElementConfig,
-    id: Id,
+    pub left: Border,
+    pub right: Border,
+    pub top: Border,
+    pub bottom: Border,
+    pub between_childs: Border,
+    pub corner_radius: CornerRadius,
 }
 
 impl BorderContainer {
     pub fn new() -> Self {
         Self {
-            inner: zeroed_init(),
-            id: Id::default(),
-        }
-    }
-
-    pub fn attach(&mut self, id: Id) -> &mut Self {
-        self.id = id;
-        self
-    }
-
-    fn into_clay_border(width: u32, color: Color) -> Clay_Border {
-        Clay_Border {
-            width,
-            color: color.into(),
+            left: Border::default(),
+            right: Border::default(),
+            top: Border::default(),
+            bottom: Border::default(),
+            between_childs: Border::default(),
+            corner_radius: CornerRadius::All(0.),
         }
     }
 
     pub fn left(&mut self, width: u32, color: Color) -> &mut Self {
-        self.inner.left = Self::into_clay_border(width, color);
+        self.left = Border::new(width, color);
         self
     }
     pub fn right(&mut self, width: u32, color: Color) -> &mut Self {
-        self.inner.right = Self::into_clay_border(width, color);
+        self.right = Border::new(width, color);
         self
     }
     pub fn top(&mut self, width: u32, color: Color) -> &mut Self {
-        self.inner.top = Self::into_clay_border(width, color);
+        self.top = Border::new(width, color);
         self
     }
     pub fn bottom(&mut self, width: u32, color: Color) -> &mut Self {
-        self.inner.bottom = Self::into_clay_border(width, color);
+        self.bottom = Border::new(width, color);
         self
     }
     pub fn between_childs(&mut self, width: u32, color: Color) -> &mut Self {
-        self.inner.betweenChildren = Self::into_clay_border(width, color);
+        self.between_childs = Border::new(width, color);
         self
     }
     pub fn all_directions(&mut self, width: u32, color: Color) -> &mut Self {
@@ -63,18 +97,43 @@ impl BorderContainer {
             .between_childs(width, color)
     }
 
-    pub fn corner_radius(&mut self, radius: CornerRadius) -> &mut Self {
-        self.inner.cornerRadius = radius.into();
+    pub fn corner_radius(&mut self, corner_radius: CornerRadius) -> &mut Self {
+        self.corner_radius = corner_radius;
         self
     }
 
-    pub fn end(&self) -> TypedConfig {
-        let memory = unsafe { Clay__StoreBorderElementConfig(self.inner) };
+    pub fn end(&self, id: Id) -> TypedConfig {
+        let memory = unsafe { Clay__StoreBorderElementConfig((*self).into()) };
 
         TypedConfig {
             config_memory: memory as _,
-            id: self.id.into(),
+            id: id.into(),
             config_type: ElementConfigType::BorderContainer as _,
+        }
+    }
+}
+
+impl From<Clay_BorderElementConfig> for BorderContainer {
+    fn from(value: Clay_BorderElementConfig) -> Self {
+        Self {
+            left: value.left.into(),
+            right: value.right.into(),
+            top: value.top.into(),
+            bottom: value.bottom.into(),
+            between_childs: value.betweenChildren.into(),
+            corner_radius: value.cornerRadius.into(),
+        }
+    }
+}
+impl From<BorderContainer> for Clay_BorderElementConfig {
+    fn from(value: BorderContainer) -> Self {
+        Self {
+            left: value.left.into(),
+            right: value.right.into(),
+            top: value.top.into(),
+            bottom: value.bottom.into(),
+            betweenChildren: value.between_childs.into(),
+            cornerRadius: value.corner_radius.into(),
         }
     }
 }

@@ -21,6 +21,7 @@ pub enum ElementConfigType {
     Layout = 66,
 }
 
+#[derive(Debug, Copy, Clone, PartialEq)]
 pub enum CornerRadius {
     All(f32),
     Individual {
