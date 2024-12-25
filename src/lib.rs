@@ -1,3 +1,5 @@
+#![cfg_attr(not(feature = "std"), no_std)]
+
 pub mod bindings;
 
 pub mod color;
@@ -33,7 +35,7 @@ unsafe extern "C" fn measure_text_handle(
     config: *mut Clay_TextElementConfig,
 ) -> Clay_Dimensions {
     match MEASURE_TEXT_HANDLER {
-        Some(func) => func(str.as_ref().unwrap().to_owned().into(), config.into()).into(),
+        Some(func) => func((*str.as_ref().unwrap()).into(), config.into()).into(),
         None => Clay_Dimensions {
             width: 0.0,
             height: 0.0,
@@ -43,10 +45,16 @@ unsafe extern "C" fn measure_text_handle(
 
 pub struct Clay {
     // Memory used internally by clay
+    #[cfg(feature = "std")]
     _memory: Vec<u8>,
+    // Memory used internally by clay. The caller is responsible for managing this memory in
+    // no_std case.
+    #[cfg(not(feature = "std"))]
+    _memory: *const core::ffi::c_void,
 }
 
 impl Clay {
+    #[cfg(feature = "std")]
     pub fn new(dimensions: Dimensions) -> Self {
         let memory_size = unsafe { Clay_MinMemorySize() };
         let memory = vec![0; memory_size as usize];
@@ -57,6 +65,19 @@ impl Clay {
         }
 
         Self { _memory: memory }
+    }
+
+    #[cfg(not(feature = "std"))]
+    pub unsafe fn new_with_memory(dimensions: Dimensions, memory: *mut core::ffi::c_void) -> Self {
+        let memory_size = Clay_MinMemorySize();
+        let arena = Clay_CreateArenaWithCapacityAndMemory(memory_size as _, memory);
+        Clay_Initialize(arena, dimensions.into());
+
+        Self { _memory: memory }
+    }
+
+    pub fn required_memory_size() -> usize {
+        unsafe { Clay_MinMemorySize() as usize }
     }
 
     pub fn measure_text_function(&self, func: MeasureTextFunction) {
@@ -111,7 +132,7 @@ impl Clay {
             } else {
                 unsafe {
                     Clay__AttachElementConfig(
-                        std::mem::transmute(config.config_memory),
+                        core::mem::transmute(config.config_memory),
                         config.config_type as _,
                     )
                 };
@@ -143,7 +164,7 @@ impl From<&str> for Clay_String {
 impl From<Clay_String> for &str {
     fn from(value: Clay_String) -> Self {
         unsafe {
-            std::str::from_utf8_unchecked(std::slice::from_raw_parts(
+            core::str::from_utf8_unchecked(core::slice::from_raw_parts(
                 value.chars as *const u8,
                 value.length as _,
             ))

@@ -15,12 +15,12 @@ impl Vector2 {
 
 impl From<Clay_Vector2> for Vector2 {
     fn from(value: Clay_Vector2) -> Self {
-        unsafe { std::mem::transmute(value) }
+        unsafe { core::mem::transmute(value) }
     }
 }
 impl From<Vector2> for Clay_Vector2 {
     fn from(value: Vector2) -> Self {
-        unsafe { std::mem::transmute(value) }
+        unsafe { core::mem::transmute(value) }
     }
 }
 
@@ -39,12 +39,12 @@ impl Dimensions {
 
 impl From<Clay_Dimensions> for Dimensions {
     fn from(value: Clay_Dimensions) -> Self {
-        unsafe { std::mem::transmute(value) }
+        unsafe { core::mem::transmute(value) }
     }
 }
 impl From<Dimensions> for Clay_Dimensions {
     fn from(value: Dimensions) -> Self {
-        unsafe { std::mem::transmute(value) }
+        unsafe { core::mem::transmute(value) }
     }
 }
 
@@ -70,11 +70,11 @@ impl BoundingBox {
 
 impl From<Clay_BoundingBox> for BoundingBox {
     fn from(value: Clay_BoundingBox) -> Self {
-        unsafe { std::mem::transmute(value) }
+        unsafe { core::mem::transmute(value) }
     }
 }
 impl From<BoundingBox> for Clay_BoundingBox {
     fn from(value: BoundingBox) -> Self {
-        unsafe { std::mem::transmute(value) }
+        unsafe { core::mem::transmute(value) }
     }
 }
