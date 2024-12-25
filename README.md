@@ -9,7 +9,7 @@ Rust bindings for [Clay](https://github.com/nicbarker/clay), a UI layout library
 
 - (O) Elements
     - (X) Rectangle
-    - (O) Text
+    - (O) Text (Waiting on an update of memory handling for text on clay part)
     - (X) Image
     - (X) Floating Container
     - (X) Border Container
@@ -17,8 +17,8 @@ Rust bindings for [Clay](https://github.com/nicbarker/clay), a UI layout library
     - (X) Custom Elements
 - (X) Text Measuring
 - (X) Element Ids
-- (O) Interactions
-- ( ) Debug Tools
+- (O) Interactions (Missing Clay_PointerOver)
+- (X) Debug Tools
 - (X) Render Commands
 - (O) Full Test Coverrage
 - ( ) Examples
