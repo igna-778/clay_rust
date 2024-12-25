@@ -22,6 +22,25 @@ pub struct TypedConfig {
     pub config_type: ElementConfigType,
 }
 
+pub type MeasureTextFunction = fn(text: &str, config: TextElementConfig) -> Dimensions;
+
+// Is used to store the current callback for measuring text
+static mut MEASURE_TEXT_HANDLER: Option<MeasureTextFunction> = None;
+
+// Converts the args and calls `MEASURE_TEXT_HANDLER`. Passed to clay with `Clay_SetMeasureTextFunction`
+unsafe extern "C" fn measure_text_handle(
+    str: *mut Clay_String,
+    config: *mut Clay_TextElementConfig,
+) -> Clay_Dimensions {
+    match MEASURE_TEXT_HANDLER {
+        Some(func) => func(str.as_ref().unwrap().to_owned().into(), config.into()).into(),
+        None => Clay_Dimensions {
+            width: 0.0,
+            height: 0.0,
+        },
+    }
+}
+
 pub struct Clay {
     // Memory used internally by clay
     _memory: Vec<u8>,
@@ -38,6 +57,13 @@ impl Clay {
         }
 
         Self { _memory: memory }
+    }
+
+    pub fn measure_text_function(&self, func: MeasureTextFunction) {
+        unsafe {
+            MEASURE_TEXT_HANDLER = Some(func);
+            Clay_SetMeasureTextFunction(Some(measure_text_handle));
+        }
     }
 
     pub fn layout_dimensions(&self, dimensions: Dimensions) {
@@ -105,7 +131,6 @@ impl Clay {
         unsafe { Clay__OpenTextElement(text.into(), config.into()) };
     }
 }
-
 
 impl From<&str> for Clay_String {
     fn from(value: &str) -> Self {

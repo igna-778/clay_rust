@@ -17,6 +17,11 @@ impl From<TextElementConfig> for *mut Clay_TextElementConfig {
         value.inner
     }
 }
+impl From<*mut Clay_TextElementConfig> for TextElementConfig {
+    fn from(value: *mut Clay_TextElementConfig) -> Self {
+        Self { inner: value }
+    }
+}
 
 pub struct Text {
     inner: Clay_TextElementConfig,

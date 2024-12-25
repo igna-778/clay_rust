@@ -56,10 +56,18 @@ impl From<CornerRadius> for Clay_CornerRadius {
 }
 impl From<Clay_CornerRadius> for CornerRadius {
     fn from(value: Clay_CornerRadius) -> Self {
-        if value.topLeft == value.topRight && value.topRight == value.bottomLeft && value.bottomLeft == value.bottomRight {
+        if value.topLeft == value.topRight
+            && value.topRight == value.bottomLeft
+            && value.bottomLeft == value.bottomRight
+        {
             Self::All(value.topLeft)
-        }else {
-            Self::Individual { top_left: value.topLeft, top_right: value.topRight, bottom_left: value.bottomLeft, bottom_right: value.bottomRight }
+        } else {
+            Self::Individual {
+                top_left: value.topLeft,
+                top_right: value.topRight,
+                bottom_left: value.bottomLeft,
+                bottom_right: value.bottomRight,
+            }
         }
     }
 }
