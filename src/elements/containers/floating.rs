@@ -104,9 +104,9 @@ impl From<Clay_FloatingElementConfig> for FloatingContainer {
             expand: value.expand.into(),
             z_index: value.zIndex,
             parent: value.parentId,
-            element_attachment: unsafe { std::mem::transmute(value.attachment.element) },
-            parent_attachment: unsafe { std::mem::transmute(value.attachment.parent) },
-            pointer_capture_mode: unsafe { std::mem::transmute(value.pointerCaptureMode) },
+            element_attachment: unsafe { core::mem::transmute(value.attachment.element) },
+            parent_attachment: unsafe { core::mem::transmute(value.attachment.parent) },
+            pointer_capture_mode: unsafe { core::mem::transmute(value.pointerCaptureMode) },
         }
     }
 }

@@ -34,25 +34,25 @@ pub enum RenderCommandConfig {
 
 impl From<&Clay_RenderCommand> for RenderCommandConfig {
     fn from(value: &Clay_RenderCommand) -> Self {
-        match unsafe { std::mem::transmute(value.commandType) } {
+        match unsafe { core::mem::transmute(value.commandType) } {
             RenderCommandType::None => Self::None(),
-            RenderCommandType::Rectangle => Self::Rectangle(Rectangle::from(unsafe {
-                (&mut *(value.config.rectangleElementConfig)).to_owned()
+            RenderCommandType::Rectangle => Self::Rectangle(Rectangle::from(*unsafe {
+                &mut *(value.config.rectangleElementConfig)
             })),
-            RenderCommandType::Border => Self::Border(BorderContainer::from(unsafe {
-                (&mut *(value.config.borderElementConfig)).to_owned()
+            RenderCommandType::Border => Self::Border(BorderContainer::from(*unsafe {
+                &mut *(value.config.borderElementConfig)
             })),
             RenderCommandType::Text => Self::Text(
                 <Clay_String as Into<&str>>::into(value.text).to_string(),
-                Text::from(unsafe { (&mut *(value.config.textElementConfig)).to_owned() }),
+                Text::from(*unsafe { &mut *(value.config.textElementConfig) }),
             ),
-            RenderCommandType::Image => Self::Image(Image::from(unsafe {
-                (&mut *(value.config.imageElementConfig)).to_owned()
+            RenderCommandType::Image => Self::Image(Image::from(*unsafe {
+                &mut *(value.config.imageElementConfig)
             })),
             RenderCommandType::ScissorStart => Self::ScissorStart(),
             RenderCommandType::ScissorEnd => Self::ScissorEnd(),
-            RenderCommandType::Custom => Self::Custom(Custom::from(unsafe {
-                (&mut *(value.config.customElementConfig)).to_owned()
+            RenderCommandType::Custom => Self::Custom(Custom::from(*unsafe {
+                &mut *(value.config.customElementConfig)
             })),
         }
     }

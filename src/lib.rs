@@ -120,7 +120,7 @@ impl Clay {
 
     pub fn end(&self) -> impl Iterator<Item = RenderCommand> {
         let array = unsafe { Clay_EndLayout() };
-        let slice = unsafe { std::slice::from_raw_parts(array.internalArray, array.length as _) };
+        let slice = unsafe { core::slice::from_raw_parts(array.internalArray, array.length as _) };
         slice
             .into_iter()
             .map(|command| RenderCommand::from(*command))

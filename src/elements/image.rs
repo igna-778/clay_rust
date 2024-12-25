@@ -13,7 +13,7 @@ pub struct Image {
 impl Image {
     pub fn new() -> Self {
         Self {
-            data: std::ptr::null_mut(),
+            data: core::ptr::null_mut(),
             source_dimensions: Dimensions::default(),
         }
     }

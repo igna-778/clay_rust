@@ -90,7 +90,7 @@ impl From<Clay_TextElementConfig> for Text {
             font_size: value.fontSize,
             letter_spacing: value.letterSpacing,
             line_height: value.lineHeight,
-            wrap_mode: unsafe { std::mem::transmute(value.wrapMode) },
+            wrap_mode: unsafe { core::mem::transmute(value.wrapMode) },
         }
     }
 }
