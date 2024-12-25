@@ -19,7 +19,7 @@ Rust bindings for [Clay](https://github.com/nicbarker/clay), a UI layout library
 - (X) Element Ids
 - (O) Interactions
 - ( ) Debug Tools
-- ( ) Render Commands
+- (X) Render Commands
 - (O) Full Test Coverrage
 - ( ) Examples
 
