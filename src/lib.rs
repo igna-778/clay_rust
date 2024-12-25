@@ -88,9 +88,9 @@ impl Clay {
         }
     }
 
-    pub fn enable_debug_mode(&self) {
+    pub fn enable_debug_mode(&self, enable: bool) {
         unsafe {
-            Clay_SetDebugModeEnabled(true);
+            Clay_SetDebugModeEnabled(enable);
         }
     }
 
