@@ -1,6 +1,6 @@
-use crate::{bindings::*, color::Color, mem::zeroed_init};
+use crate::{bindings::*, color::Color};
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u32)]
 pub enum TextElementConfigWrapMode {
     Words = Clay_TextElementConfigWrapMode_CLAY_TEXT_WRAP_WORDS,
@@ -23,50 +23,86 @@ impl From<*mut Clay_TextElementConfig> for TextElementConfig {
     }
 }
 
+#[derive(Debug, Clone, Copy)]
 pub struct Text {
-    inner: Clay_TextElementConfig,
+    color: Color,
+    font_id: u16,
+    font_size: u16,
+    letter_spacing: u16,
+    line_height: u16,
+    wrap_mode: TextElementConfigWrapMode,
 }
 
 impl Text {
     pub fn new() -> Self {
         Self {
-            inner: zeroed_init(),
+            color: Color::rgba(0., 0., 0., 0.),
+            font_id: 0,
+            font_size: 0,
+            letter_spacing: 0,
+            line_height: 0,
+            wrap_mode: TextElementConfigWrapMode::None,
         }
     }
 
     pub fn color(&mut self, color: Color) -> &mut Self {
-        self.inner.textColor = color.into();
-        self
-    }
-
-    pub fn font_size(&mut self, size: u16) -> &mut Self {
-        self.inner.fontSize = size;
+        self.color = color;
         self
     }
 
     pub fn font_id(&mut self, id: u16) -> &mut Self {
-        self.inner.fontId = id;
+        self.font_id = id;
+        self
+    }
+
+    pub fn font_size(&mut self, size: u16) -> &mut Self {
+        self.font_size = size;
         self
     }
 
     pub fn letter_spacing(&mut self, spacing: u16) -> &mut Self {
-        self.inner.letterSpacing = spacing;
+        self.letter_spacing = spacing;
         self
     }
 
     pub fn line_height(&mut self, height: u16) -> &mut Self {
-        self.inner.lineHeight = height;
+        self.line_height = height;
         self
     }
 
     pub fn wrap_mode(&mut self, mode: TextElementConfigWrapMode) -> &mut Self {
-        self.inner.wrapMode = mode as u32;
+        self.wrap_mode = mode;
         self
     }
 
     pub fn end(&self) -> TextElementConfig {
-        let memory = unsafe { Clay__StoreTextElementConfig(self.inner) };
+        let memory = unsafe { Clay__StoreTextElementConfig((*self).into()) };
 
         TextElementConfig { inner: memory }
+    }
+}
+
+impl From<Clay_TextElementConfig> for Text {
+    fn from(value: Clay_TextElementConfig) -> Self {
+        Self {
+            color: value.textColor.into(),
+            font_id: value.fontId,
+            font_size: value.fontSize,
+            letter_spacing: value.letterSpacing,
+            line_height: value.lineHeight,
+            wrap_mode: unsafe { std::mem::transmute(value.wrapMode) },
+        }
+    }
+}
+impl From<Text> for Clay_TextElementConfig {
+    fn from(value: Text) -> Self {
+        Self {
+            textColor: value.color.into(),
+            fontId: value.font_id,
+            fontSize: value.font_size,
+            letterSpacing: value.letter_spacing,
+            lineHeight: value.line_height,
+            wrapMode: value.wrap_mode as _,
+        }
     }
 }

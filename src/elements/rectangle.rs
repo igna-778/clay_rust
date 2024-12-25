@@ -1,42 +1,55 @@
-use crate::{bindings::*, color::Color, id::Id, mem::zeroed_init, TypedConfig};
+use crate::{bindings::*, color::Color, id::Id, TypedConfig};
 
 use super::{CornerRadius, ElementConfigType};
 
+#[derive(Debug, Copy, Clone)]
 pub struct Rectangle {
-    inner: Clay_RectangleElementConfig,
-    id: Id,
+    pub color: Color,
+    pub corner_radius: CornerRadius,
 }
 
 impl Rectangle {
     pub fn new() -> Self {
         Self {
-            inner: zeroed_init(),
-            id: Id::default(),
+            color: Color::rgba(0., 0., 0., 0.),
+            corner_radius: CornerRadius::All(0.),
         }
     }
 
-    pub fn attach(&mut self, id: Id) -> &mut Self {
-        self.id = id;
-        self
-    }
-
     pub fn color(&mut self, color: Color) -> &mut Self {
-        self.inner.color = color.into();
+        self.color = color;
         self
     }
 
-    pub fn corner_radius(&mut self, radius: CornerRadius) -> &mut Self {
-        self.inner.cornerRadius = radius.into();
+    pub fn corner_radius(&mut self, corner_radius: CornerRadius) -> &mut Self {
+        self.corner_radius = corner_radius;
         self
     }
 
-    pub fn end(&self) -> TypedConfig {
-        let memory = unsafe { Clay__StoreRectangleElementConfig(self.inner) };
+    pub fn end(&self, id: Id) -> TypedConfig {
+        let memory = unsafe { Clay__StoreRectangleElementConfig((*self).into()) };
 
         TypedConfig {
             config_memory: memory as _,
-            id: self.id.into(),
+            id: id.into(),
             config_type: ElementConfigType::Rectangle as _,
+        }
+    }
+}
+
+impl From<Clay_RectangleElementConfig> for Rectangle {
+    fn from(value: Clay_RectangleElementConfig) -> Self {
+        Self {
+            color: value.color.into(),
+            corner_radius: value.cornerRadius.into(),
+        }
+    }
+}
+impl From<Rectangle> for Clay_RectangleElementConfig {
+    fn from(value: Rectangle) -> Self {
+        Self {
+            color: value.color.into(),
+            cornerRadius: value.corner_radius.into(),
         }
     }
 }

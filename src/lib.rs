@@ -13,6 +13,7 @@ mod mem;
 
 use elements::{text::TextElementConfig, ElementConfigType};
 use math::{Dimensions, Vector2};
+use render_commands::RenderCommand;
 
 use crate::bindings::*;
 
@@ -117,8 +118,12 @@ impl Clay {
         unsafe { Clay_BeginLayout() };
     }
 
-    pub fn end(&self) -> Clay_RenderCommandArray {
-        unsafe { Clay_EndLayout() }
+    pub fn end(&self) -> impl Iterator<Item = RenderCommand> {
+        let array = unsafe { Clay_EndLayout() };
+        let slice = unsafe { std::slice::from_raw_parts(array.internalArray, array.length as _) };
+        slice
+            .into_iter()
+            .map(|command| RenderCommand::from(*command))
     }
 
     pub fn with<F: FnOnce(&Clay), const N: usize>(&self, configs: [TypedConfig; N], f: F) {
@@ -178,6 +183,7 @@ mod tests {
 
     use color::Color;
     use elements::text::Text;
+    use id::Id;
 
     use super::*;
 
@@ -203,7 +209,7 @@ mod tests {
                     .end(),
                 elements::rectangle::Rectangle::new()
                     .color(Color::rgb(255., 255., 255.))
-                    .end(),
+                    .end(Id::new("parent_rect")),
             ],
             |clay| {
                 clay.with(
@@ -215,7 +221,7 @@ mod tests {
                             .end(),
                         elements::rectangle::Rectangle::new()
                             .color(Color::rgb(255., 255., 255.))
-                            .end(),
+                            .end(Id::new("rect_under_rect")),
                     ],
                     |_clay| {},
                 );
@@ -229,9 +235,9 @@ mod tests {
                 elements::containers::border::BorderContainer::new()
                     .all_directions(2, Color::rgb(255., 255., 0.))
                     .corner_radius(elements::CornerRadius::All(25.))
-                    .end(),
+                    .end(Id::new_index("Border_container", 1)),
             ],
-            |_clay| {
+            |clay| {
                 clay.with(
                     [
                         layout::Layout::new()
@@ -240,34 +246,20 @@ mod tests {
                             .end(),
                         elements::rectangle::Rectangle::new()
                             .color(Color::rgb(0., 255., 255.))
-                            .end(),
+                            .end(Id::new("rect_under_border")),
                     ],
                     |_clay| {},
                 );
             },
         );
 
-        // TODO: Cleanup
-        let render_array = clay.end();
-        let items = unsafe {
-            std::slice::from_raw_parts(render_array.internalArray, render_array.length as _)
-        };
+        let items = clay.end();
 
         for item in items {
             println!(
-                "x:{}, y:{}, width:{}, height:{}, type:{}",
-                item.boundingBox.x,
-                item.boundingBox.y,
-                item.boundingBox.width,
-                item.boundingBox.height,
-                item.commandType
+                "id: {}\nbbox: {:?}\nconfig: {:?}",
+                item.id, item.bounding_box, item.config,
             );
-            if item.commandType == render_commands::RenderCommandType::Rectangle as _ {
-                let rectangle = unsafe { item.config.rectangleElementConfig };
-                unsafe {
-                    println!("{:?}", ((*rectangle).cornerRadius));
-                }
-            }
         }
     }
 
