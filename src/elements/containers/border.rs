@@ -46,12 +46,12 @@ impl From<Border> for Clay_Border {
 
 #[derive(Debug, Clone, Copy)]
 pub struct BorderContainer {
-    left: Border,
-    right: Border,
-    top: Border,
-    bottom: Border,
-    between_childs: Border,
-    corner_radius: CornerRadius,
+    pub left: Border,
+    pub right: Border,
+    pub top: Border,
+    pub bottom: Border,
+    pub between_childs: Border,
+    pub corner_radius: CornerRadius,
 }
 
 impl BorderContainer {

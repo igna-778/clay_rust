@@ -29,13 +29,13 @@ pub enum PointerCaptureMode {
 
 #[derive(Debug, Copy, Clone)]
 pub struct FloatingContainer {
-    offset: Vector2,
-    expand: Dimensions,
-    z_index: u16,
-    parent: u32,
-    parent_attachment: FloatingAttachPointType,
-    element_attachment: FloatingAttachPointType,
-    pointer_capture_mode: PointerCaptureMode,
+    pub offset: Vector2,
+    pub expand: Dimensions,
+    pub z_index: u16,
+    pub parent: u32,
+    pub parent_attachment: FloatingAttachPointType,
+    pub element_attachment: FloatingAttachPointType,
+    pub pointer_capture_mode: PointerCaptureMode,
 }
 
 impl FloatingContainer {

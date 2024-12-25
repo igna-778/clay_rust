@@ -25,12 +25,12 @@ impl From<*mut Clay_TextElementConfig> for TextElementConfig {
 
 #[derive(Debug, Clone, Copy)]
 pub struct Text {
-    color: Color,
-    font_id: u16,
-    font_size: u16,
-    letter_spacing: u16,
-    line_height: u16,
-    wrap_mode: TextElementConfigWrapMode,
+    pub color: Color,
+    pub font_id: u16,
+    pub font_size: u16,
+    pub letter_spacing: u16,
+    pub line_height: u16,
+    pub wrap_mode: TextElementConfigWrapMode,
 }
 
 impl Text {
