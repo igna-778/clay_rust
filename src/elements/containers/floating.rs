@@ -45,8 +45,8 @@ impl FloatingContainer {
             expand: Dimensions::default(),
             z_index: 0,
             parent: 0,
-            parent_attachment: FloatingAttachPointType::CenterCenter,
-            element_attachment: FloatingAttachPointType::CenterCenter,
+            parent_attachment: FloatingAttachPointType::LeftTop,
+            element_attachment: FloatingAttachPointType::LeftTop,
             pointer_capture_mode: PointerCaptureMode::Capture,
         }
     }

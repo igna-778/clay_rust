@@ -182,8 +182,11 @@ mod tests {
     use std::mem;
 
     use color::Color;
-    use elements::text::Text;
+    use elements::{
+        containers::border::BorderContainer, rectangle::Rectangle, text::Text, CornerRadius,
+    };
     use id::Id;
+    use layout::{padding::Padding, sizing::Sizing, Layout};
 
     use super::*;
 
@@ -202,24 +205,24 @@ mod tests {
 
         clay.with(
             [
-                layout::Layout::new()
-                    .sizing_width(layout::Sizing::Fixed(100.0))
-                    .sizing_height(layout::Sizing::Fixed(100.0))
-                    .padding((10, 10))
+                Layout::new()
+                    .width(Sizing::Fixed(100.0))
+                    .height(Sizing::Fixed(100.0))
+                    .padding(Padding::new(10, 10))
                     .end(),
-                elements::rectangle::Rectangle::new()
+                Rectangle::new()
                     .color(Color::rgb(255., 255., 255.))
                     .end(Id::new("parent_rect")),
             ],
             |clay| {
                 clay.with(
                     [
-                        layout::Layout::new()
-                            .sizing_width(layout::Sizing::Fixed(100.0))
-                            .sizing_height(layout::Sizing::Fixed(100.0))
-                            .padding((10, 10))
+                        Layout::new()
+                            .width(Sizing::Fixed(100.0))
+                            .height(Sizing::Fixed(100.0))
+                            .padding(Padding::new(10, 10))
                             .end(),
-                        elements::rectangle::Rectangle::new()
+                        Rectangle::new()
                             .color(Color::rgb(255., 255., 255.))
                             .end(Id::new("rect_under_rect")),
                     ],
@@ -231,20 +234,20 @@ mod tests {
         );
         clay.with(
             [
-                layout::Layout::new().padding((16, 16)).end(),
-                elements::containers::border::BorderContainer::new()
+                Layout::new().padding(Padding::new(16, 16)).end(),
+                BorderContainer::new()
                     .all_directions(2, Color::rgb(255., 255., 0.))
-                    .corner_radius(elements::CornerRadius::All(25.))
+                    .corner_radius(CornerRadius::All(25.))
                     .end(Id::new_index("Border_container", 1)),
             ],
             |clay| {
                 clay.with(
                     [
-                        layout::Layout::new()
-                            .sizing_width(layout::Sizing::Fixed(50.0))
-                            .sizing_height(layout::Sizing::Fixed(50.0))
+                        Layout::new()
+                            .width(Sizing::Fixed(50.0))
+                            .height(Sizing::Fixed(50.0))
                             .end(),
-                        elements::rectangle::Rectangle::new()
+                        Rectangle::new()
                             .color(Color::rgb(0., 255., 255.))
                             .end(Id::new("rect_under_border")),
                     ],
