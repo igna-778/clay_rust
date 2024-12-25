@@ -88,6 +88,12 @@ impl Clay {
         }
     }
 
+    pub fn enable_debug_mode(&self) {
+        unsafe {
+            Clay_SetDebugModeEnabled(true);
+        }
+    }
+
     pub fn layout_dimensions(&self, dimensions: Dimensions) {
         unsafe {
             Clay_SetLayoutDimensions(dimensions.into());
@@ -107,6 +113,10 @@ impl Clay {
         unsafe {
             Clay_UpdateScrollContainers(drag_scrolling_enabled, scroll_delta.into(), delta_time);
         }
+    }
+
+    pub fn hovered(&self) -> bool {
+        unsafe { Clay_Hovered() }
     }
 
     // TODO: Uncomment once `clay.h` adds the declaration of `Clay_PointerOver`
