@@ -3,9 +3,9 @@ name = "clay-layout"
 version = "0.1.0"
 edition = "2021"
 description = "Rust bindings for Clay, a UI layout library written in C."
-license = "zlib/libpng"
 repository = "https://github.com/clay-ui-rs/clay"
 readme = "README.md"
+license-file = "LICENSE.md"
 exclude = [
     "scripts/*",
     ".vscode/*",
