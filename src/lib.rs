@@ -2,9 +2,9 @@
 
 pub mod bindings;
 
-pub mod errors;
 pub mod color;
 pub mod elements;
+pub mod errors;
 pub mod id;
 pub mod layout;
 pub mod math;
@@ -64,17 +64,21 @@ pub struct Clay {
 impl Clay {
     #[cfg(feature = "std")]
     pub fn new(dimensions: Dimensions) -> Self {
-        let memory_size = unsafe { Clay_MinMemorySize() };
+        let memory_size = Self::required_memory_size();
         let memory = vec![0; memory_size as usize];
-        
+
         unsafe {
             let arena =
                 Clay_CreateArenaWithCapacityAndMemory(memory_size as _, memory.as_ptr() as _);
-            
-            Clay_Initialize(arena, dimensions.into(), Clay_ErrorHandler {
-                errorHandlerFunction: Some(error_handler),
-                userData: 0,
-            });
+
+            Clay_Initialize(
+                arena,
+                dimensions.into(),
+                Clay_ErrorHandler {
+                    errorHandlerFunction: Some(error_handler),
+                    userData: 0,
+                },
+            );
         }
 
         Self { _memory: memory }
@@ -82,13 +86,17 @@ impl Clay {
 
     #[cfg(not(feature = "std"))]
     pub unsafe fn new_with_memory(dimensions: Dimensions, memory: *mut core::ffi::c_void) -> Self {
-        let memory_size = Clay_MinMemorySize();
+        let memory_size = Self::required_memory_size();
         let arena = Clay_CreateArenaWithCapacityAndMemory(memory_size as _, memory);
 
-        Clay_Initialize(arena, dimensions.into(), Clay_ErrorHandler {
-            errorHandlerFunction: Some(error_handler),
-            userData: 0,
-        });
+        Clay_Initialize(
+            arena,
+            dimensions.into(),
+            Clay_ErrorHandler {
+                errorHandlerFunction: Some(error_handler),
+                userData: 0,
+            },
+        );
 
         Self { _memory: memory }
     }
@@ -101,6 +109,17 @@ impl Clay {
         unsafe {
             MEASURE_TEXT_HANDLER = Some(func);
             Clay_SetMeasureTextFunction(Some(measure_text_handle));
+        }
+    }
+
+    pub fn max_element_count(&self, max_element_count: u32) {
+        unsafe {
+            Clay_SetMaxElementCount(max_element_count);
+        }
+    }
+    pub fn max_measure_text_cache_word_count(&self, count: u32) {
+        unsafe {
+            Clay_SetMaxElementCount(count);
         }
     }
 
@@ -207,7 +226,10 @@ impl From<Clay_String> for &str {
 mod tests {
     use color::Color;
     use elements::{
-        containers::{border::BorderContainer, floating::FloatingContainer}, rectangle::Rectangle, text::Text, CornerRadius,
+        containers::{border::BorderContainer, floating::FloatingContainer},
+        rectangle::Rectangle,
+        text::Text,
+        CornerRadius,
     };
     use id::Id;
     use layout::{padding::Padding, sizing::Sizing, Layout};
