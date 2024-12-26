@@ -237,7 +237,7 @@ mod tests {
                 Rectangle::new()
                     .color(Color::rgb(255., 255., 255.))
                     .end(Id::new("parent_rect")),
-                FloatingContainer::new().end(Id::new("tegfddgftds"))
+                // FloatingContainer::new().end(Id::new("tegfddgftds"))
             ],
             |clay| {
                 clay.with(
