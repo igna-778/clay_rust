@@ -4,12 +4,13 @@ fn main() {
     if target_os == "windows" {
         cc::Build::new()
             .file("build.cpp")
+            .warnings(false)
             .std("c++20")
             .compile("clay");
     } else {
         cc::Build::new()
             .file("build.c")
-            .extra_warnings(false)
+            .warnings(false)
             .compile("clay");
     }
 }
