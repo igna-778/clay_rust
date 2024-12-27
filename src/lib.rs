@@ -87,7 +87,7 @@ impl Clay {
     #[cfg(not(feature = "std"))]
     pub unsafe fn new_with_memory(dimensions: Dimensions, memory: *mut core::ffi::c_void) -> Self {
         let memory_size = Self::required_memory_size();
-        let arena = Clay_CreateArenaWithCapacityAndMemory(memory_size, memory);
+        let arena = Clay_CreateArenaWithCapacityAndMemory(memory_size as _, memory);
 
         Clay_Initialize(
             arena,
