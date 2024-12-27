@@ -23,6 +23,7 @@ pub enum ElementConfigType {
 
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub enum CornerRadius {
+    /// Sets the same value to all corner
     All(f32),
     Individual {
         top_left: f32,

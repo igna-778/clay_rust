@@ -3,8 +3,11 @@ use crate::{bindings::*, color::Color};
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u32)]
 pub enum TextElementConfigWrapMode {
+    /// Wraps on whitespaces not breaking words
     Words = Clay_TextElementConfigWrapMode_CLAY_TEXT_WRAP_WORDS,
+    /// Only wraps on new line characters
     Newline = Clay_TextElementConfigWrapMode_CLAY_TEXT_WRAP_NEWLINES,
+    /// Never wraps, can overflow of parent layout
     None = Clay_TextElementConfigWrapMode_CLAY_TEXT_WRAP_NONE,
 }
 
@@ -26,6 +29,8 @@ impl From<*mut Clay_TextElementConfig> for TextElementConfig {
 #[derive(Debug, Clone, Copy)]
 pub struct Text {
     pub color: Color,
+    /// Clay doesn't manage font, it's up to you to assign an id to each font you are using, and
+    /// passing them to the [font_id](Text::font_id) field
     pub font_id: u16,
     pub font_size: u16,
     pub letter_spacing: u16,
@@ -83,7 +88,7 @@ impl Default for Text {
             font_size: 0,
             letter_spacing: 0,
             line_height: 0,
-            wrap_mode: TextElementConfigWrapMode::None,
+            wrap_mode: TextElementConfigWrapMode::Words,
         }
     }
 }

@@ -16,6 +16,7 @@ pub enum LayoutAlignmentY {
     Bottom = Clay_LayoutAlignmentY_CLAY_ALIGN_Y_BOTTOM,
 }
 
+/// Controls the alignment of the childs in the layout
 #[derive(Debug, Copy, Clone)]
 pub struct Alignment {
     pub x: LayoutAlignmentX,

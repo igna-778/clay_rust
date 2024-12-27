@@ -6,12 +6,14 @@ pub struct Id {
 }
 
 impl Id {
+    /// Creates a clay id using the `label`
     pub fn new(label: &str) -> Self {
         Self {
             inner: unsafe { Clay__HashString(label.into(), 0, 0) },
         }
     }
 
+    /// Creates a clay id using the `label` and the `index`
     pub fn new_index(label: &str, index: u32) -> Self {
         Self {
             inner: unsafe { Clay__HashString(label.into(), index, 0) },
