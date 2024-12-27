@@ -29,12 +29,18 @@ pub enum PointerCaptureMode {
 
 #[derive(Debug, Copy, Clone)]
 pub struct FloatingContainer {
+    /// Offset from the default attachment point
     pub offset: Vector2,
+    /// Minimum dimensions of the container
     pub expand: Dimensions,
     pub z_index: u16,
+    /// Id of the parent layout
     pub parent: u32,
-    pub parent_attachment: FloatingAttachPointType,
+    /// The attachment point on the container
     pub element_attachment: FloatingAttachPointType,
+    /// The point to which you attach [element_attachment](FloatingContainer::element_attachment)
+    /// on the parent
+    pub parent_attachment: FloatingAttachPointType,
     pub pointer_capture_mode: PointerCaptureMode,
 }
 

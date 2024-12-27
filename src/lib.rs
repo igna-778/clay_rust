@@ -52,11 +52,11 @@ unsafe extern "C" fn error_handler(error_data: Clay_ErrorData) {
 }
 
 pub struct Clay {
-    // Memory used internally by clay
+    /// Memory used internally by clay
     #[cfg(feature = "std")]
     _memory: Vec<u8>,
-    // Memory used internally by clay. The caller is responsible for managing this memory in
-    // no_std case.
+    /// Memory used internally by clay. The caller is responsible for managing this memory in
+    /// no_std case.
     #[cfg(not(feature = "std"))]
     _memory: *const core::ffi::c_void,
 }
@@ -65,7 +65,7 @@ impl Clay {
     #[cfg(feature = "std")]
     pub fn new(dimensions: Dimensions) -> Self {
         let memory_size = Self::required_memory_size();
-        let memory = vec![0; memory_size as usize];
+        let memory = vec![0; memory_size];
 
         unsafe {
             let arena =
@@ -101,10 +101,12 @@ impl Clay {
         Self { _memory: memory }
     }
 
+    /// Wrapper for `Clay_MinMemorySize`, returns the minimum required memory by clay
     pub fn required_memory_size() -> usize {
         unsafe { Clay_MinMemorySize() as usize }
     }
 
+    /// Sets the function used by clay to measure dimensions of strings of `Text` elements
     pub fn measure_text_function(&self, func: MeasureTextFunction) {
         unsafe {
             MEASURE_TEXT_HANDLER = Some(func);
@@ -112,28 +114,37 @@ impl Clay {
         }
     }
 
+    /// Sets the maximum number of element that clay supports
+    /// **Use only if you know what you are doing or your getting errors from clay**
     pub fn max_element_count(&self, max_element_count: u32) {
         unsafe {
             Clay_SetMaxElementCount(max_element_count);
         }
     }
+    /// Sets the capacity of the cache used for text in the measure text function
+    /// **Use only if you know what you are doing or your getting errors from clay**
     pub fn max_measure_text_cache_word_count(&self, count: u32) {
         unsafe {
             Clay_SetMaxElementCount(count);
         }
     }
 
+    /// Enables or disables the debug mode of clay
     pub fn enable_debug_mode(&self, enable: bool) {
         unsafe {
             Clay_SetDebugModeEnabled(enable);
         }
     }
 
+    /// Sets the dimensions of the global layout, use if, for example the window size you render to
+    /// changed
     pub fn layout_dimensions(&self, dimensions: Dimensions) {
         unsafe {
             Clay_SetLayoutDimensions(dimensions.into());
         }
     }
+    /// Updates the state of the pointer for clay. Used to update scroll containers and for
+    /// interactions functions
     pub fn pointer_state(&self, position: Vector2, is_down: bool) {
         unsafe {
             Clay_SetPointerState(position.into(), is_down);
@@ -150,6 +161,7 @@ impl Clay {
         }
     }
 
+    /// Returns if the current element you are creating is hovered
     pub fn hovered(&self) -> bool {
         unsafe { Clay_Hovered() }
     }
@@ -169,6 +181,10 @@ impl Clay {
         slice.iter().map(|command| RenderCommand::from(*command))
     }
 
+    /// Create an element, passing it's config and a function to add childrens
+    /// ```
+    /// // TODO: Add Example
+    /// ```
     pub fn with<F: FnOnce(&Clay), const N: usize>(&self, configs: [TypedConfig; N], f: F) {
         unsafe { Clay__OpenElement() };
 
@@ -198,6 +214,7 @@ impl Clay {
         }
     }
 
+    /// Adds a text element to the current open element or to the root layout
     pub fn text(&self, text: &str, config: TextElementConfig) {
         unsafe { Clay__OpenTextElement(text.into(), config.into()) };
     }
@@ -247,6 +264,8 @@ mod tests {
     fn test_begin() {
         let clay = Clay::new(Dimensions::new(800.0, 600.0));
 
+        clay.measure_text_function(|_, _| Dimensions::default());
+
         clay.begin();
 
         clay.with(
@@ -275,8 +294,13 @@ mod tests {
                     ],
                     |_clay| {},
                 );
-                // THIS FAILS
-                // clay.text("test", Text::new().color(Color::rgb(255., 255., 255.)).font_size(24).end());
+                clay.text(
+                    "test",
+                    Text::new()
+                        .color(Color::rgb(255., 255., 255.))
+                        .font_size(24)
+                        .end(),
+                );
             },
         );
         clay.with(

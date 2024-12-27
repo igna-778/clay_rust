@@ -11,9 +11,15 @@ pub enum SizingType {
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum Sizing {
+    /// Fit the layout [width](Layout::width)/[height](Layout::height) to a min and max constraint
     Fit(f32, f32),
+    /// Grows to fill the parent, while keeping the layout [width](Layout::width)/[height](Layout::height)
+    /// between a min and max constraint
     Grow(f32, f32),
+    /// Fix the layout [width](Layout::width)/[height](Layout::height) to a certain value
     Fixed(f32),
+    /// Fix the layout [width](Layout::width)/[height](Layout::height) to a certain percentage of
+    /// it's parent
     Percent(f32),
 }
 

@@ -14,6 +14,7 @@ impl Custom {
         Self::default()
     }
 
+    /// The `Data` should, and must outlive the `Clay` instance !!!
     pub fn data<Data>(&mut self, data: &mut Data) -> &mut Self {
         self.data = data as *mut _ as *mut c_void;
         self
