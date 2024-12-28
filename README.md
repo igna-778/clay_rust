@@ -17,7 +17,7 @@ Rust bindings for [Clay](https://github.com/nicbarker/clay), a UI layout library
     - (X) Custom Elements
 - (X) Text Measuring
 - (X) Element Ids
-- (O) Interactions (Missing Clay_PointerOver)
+- (X) Interactions
 - (X) Debug Tools
 - (X) Render Commands
 - (O) Full Test Coverrage

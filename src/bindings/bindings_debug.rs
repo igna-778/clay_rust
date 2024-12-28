@@ -845,14 +845,14 @@ fn bindgen_test_layout_Clay_SizingMinMax() {
 #[repr(C)]
 #[derive(Copy, Clone)]
 pub struct Clay_SizingAxis {
-    pub __bindgen_anon_1: Clay_SizingAxis__bindgen_ty_1,
+    pub size: Clay_SizingAxis__bindgen_ty_1,
     pub type_: Clay__SizingType,
 }
 #[repr(C)]
 #[derive(Copy, Clone)]
 pub union Clay_SizingAxis__bindgen_ty_1 {
-    pub sizeMinMax: Clay_SizingMinMax,
-    pub sizePercent: f32,
+    pub minMax: Clay_SizingMinMax,
+    pub percent: f32,
 }
 #[test]
 fn bindgen_test_layout_Clay_SizingAxis__bindgen_ty_1() {
@@ -870,23 +870,23 @@ fn bindgen_test_layout_Clay_SizingAxis__bindgen_ty_1() {
         concat!("Alignment of ", stringify!(Clay_SizingAxis__bindgen_ty_1))
     );
     assert_eq!(
-        unsafe { ::core::ptr::addr_of!((*ptr).sizeMinMax) as usize - ptr as usize },
+        unsafe { ::core::ptr::addr_of!((*ptr).minMax) as usize - ptr as usize },
         0usize,
         concat!(
             "Offset of field: ",
             stringify!(Clay_SizingAxis__bindgen_ty_1),
             "::",
-            stringify!(sizeMinMax)
+            stringify!(minMax)
         )
     );
     assert_eq!(
-        unsafe { ::core::ptr::addr_of!((*ptr).sizePercent) as usize - ptr as usize },
+        unsafe { ::core::ptr::addr_of!((*ptr).percent) as usize - ptr as usize },
         0usize,
         concat!(
             "Offset of field: ",
             stringify!(Clay_SizingAxis__bindgen_ty_1),
             "::",
-            stringify!(sizePercent)
+            stringify!(percent)
         )
     );
 }
@@ -903,6 +903,16 @@ fn bindgen_test_layout_Clay_SizingAxis() {
         ::core::mem::align_of::<Clay_SizingAxis>(),
         4usize,
         concat!("Alignment of ", stringify!(Clay_SizingAxis))
+    );
+    assert_eq!(
+        unsafe { ::core::ptr::addr_of!((*ptr).size) as usize - ptr as usize },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(Clay_SizingAxis),
+            "::",
+            stringify!(size)
+        )
     );
     assert_eq!(
         unsafe { ::core::ptr::addr_of!((*ptr).type_) as usize - ptr as usize },
@@ -2155,6 +2165,9 @@ extern "C" {
         >,
         userData: isize,
     );
+}
+extern "C" {
+    pub fn Clay_PointerOver(elementId: Clay_ElementId) -> bool;
 }
 extern "C" {
     pub fn Clay_GetScrollContainerData(id: Clay_ElementId) -> Clay_ScrollContainerData;

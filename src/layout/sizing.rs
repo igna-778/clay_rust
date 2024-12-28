@@ -27,19 +27,19 @@ impl From<Clay_SizingAxis> for Sizing {
     fn from(value: Clay_SizingAxis) -> Self {
         match unsafe { core::mem::transmute::<u8, SizingType>(value.type_) } {
             SizingType::Fit => {
-                let min_max = unsafe { value.__bindgen_anon_1.sizeMinMax };
+                let min_max = unsafe { value.size.minMax };
                 Self::Fit(min_max.min, min_max.max)
             }
             SizingType::Grow => {
-                let min_max = unsafe { value.__bindgen_anon_1.sizeMinMax };
+                let min_max = unsafe { value.size.minMax };
                 Self::Grow(min_max.min, min_max.max)
             }
             SizingType::Fixed => {
-                let min_max = unsafe { value.__bindgen_anon_1.sizeMinMax };
+                let min_max = unsafe { value.size.minMax };
                 Self::Fixed(min_max.min)
             }
             SizingType::Percent => {
-                let percent = unsafe { value.__bindgen_anon_1.sizePercent };
+                let percent = unsafe { value.size.percent };
                 Self::Percent(percent)
             }
         }
@@ -51,20 +51,20 @@ impl From<Sizing> for Clay_SizingAxis {
         match value {
             Sizing::Fit(min, max) => Self {
                 type_: SizingType::Fit as _,
-                __bindgen_anon_1: Clay_SizingAxis__bindgen_ty_1 {
-                    sizeMinMax: Clay_SizingMinMax { min, max },
+                size: Clay_SizingAxis__bindgen_ty_1 {
+                    minMax: Clay_SizingMinMax { min, max },
                 },
             },
             Sizing::Grow(min, max) => Self {
                 type_: SizingType::Grow as _,
-                __bindgen_anon_1: Clay_SizingAxis__bindgen_ty_1 {
-                    sizeMinMax: Clay_SizingMinMax { min, max },
+                size: Clay_SizingAxis__bindgen_ty_1 {
+                    minMax: Clay_SizingMinMax { min, max },
                 },
             },
             Sizing::Fixed(size) => Self {
                 type_: SizingType::Fixed as _,
-                __bindgen_anon_1: Clay_SizingAxis__bindgen_ty_1 {
-                    sizeMinMax: Clay_SizingMinMax {
+                size: Clay_SizingAxis__bindgen_ty_1 {
+                    minMax: Clay_SizingMinMax {
                         min: size,
                         max: size,
                     },
@@ -72,8 +72,8 @@ impl From<Sizing> for Clay_SizingAxis {
             },
             Sizing::Percent(percent) => Self {
                 type_: SizingType::Percent as _,
-                __bindgen_anon_1: Clay_SizingAxis__bindgen_ty_1 {
-                    sizePercent: percent,
+                size: Clay_SizingAxis__bindgen_ty_1 {
+                    percent: percent,
                 },
             },
         }
