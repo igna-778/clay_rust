@@ -23,3 +23,6 @@ default = [ "std" ]
 std = []
 wasm = []
 debug = []
+
+[workspace]
+members = [ "examples" ]

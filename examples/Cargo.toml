@@ -1,0 +1,16 @@
+[package]
+name = "clay-layout-examples"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+clay-layout = { path = "../" }
+
+# To add a new examples add a new binary like this:
+# [[bin]]
+# name = "example_name"
+# path = "./example_file.rs"
+
+[[bin]]
+name = "basic_rectangle"
+path = "./basic_rectangle.rs"
