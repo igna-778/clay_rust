@@ -14,6 +14,7 @@ mod mem;
 
 use elements::{text::TextElementConfig, ElementConfigType};
 use errors::Error;
+use id::Id;
 use math::{Dimensions, Vector2};
 use render_commands::RenderCommand;
 
@@ -188,10 +189,9 @@ impl<'a> Clay<'a> {
         unsafe { Clay_Hovered() }
     }
 
-    // TODO: Uncomment once `clay.h` adds the declaration of `Clay_PointerOver`
-    // pub fn pointer_over(&self, id: Id) -> bool {
-    //     unsafe { Clay_PointerOver(id.into()) }
-    // }
+    pub fn pointer_over(&self, id: Id) -> bool {
+        unsafe { Clay_PointerOver(id.into()) }
+    }
 
     pub fn begin(&self) {
         unsafe { Clay_BeginLayout() };
