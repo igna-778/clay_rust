@@ -45,6 +45,21 @@ impl Layout {
         self
     }
 
+    pub fn child_gap(&mut self, child_gap: u16) -> &mut Self {
+        self.child_gap = child_gap;
+        self
+    }
+
+    pub fn child_alignment(&mut self, child_alignment: Alignment) -> &mut Self {
+        self.child_alignment = child_alignment;
+        self
+    }
+
+    pub fn direction(&mut self, direction: LayoutDirection) -> &mut Self {
+        self.direction = direction;
+        self
+    }
+
     pub fn end(&self) -> TypedConfig {
         let memory = unsafe { Clay__StoreLayoutConfig((*self).into()) };
 
