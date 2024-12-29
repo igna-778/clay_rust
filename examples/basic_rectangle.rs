@@ -1,6 +1,5 @@
 use clay_layout::{color::Color, elements::{rectangle::Rectangle, CornerRadius}, id::Id, layout::{sizing::Sizing, Layout}, math::Dimensions, Clay};
 
-
 fn main() {
     // Create the clay instance
     let clay = Clay::new(Dimensions::new(800., 600.));
