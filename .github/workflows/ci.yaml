@@ -50,32 +50,24 @@ jobs:
       if: matrix.feature == 'wasm'
       run: rustup target add wasm32-unknown-unknown
 
-    - name: Build and Test
-      run: |
-        if [ "${{ matrix.feature }}" = "wasm" ]; then
-          cargo build --target wasm32-unknown-unknown;
-        elif [ "${{ matrix.feature }}" = "no-std" ]; then
-          cargo build --no-default-features
-        elif [ "${{ matrix.feature }}" = "debug" ]; then
-          cargo build --features debug
-        else
-          cargo test;
-        fi
-      if: runner.os != 'Windows'
+    - name: Build (No features)
+      if: matrix.feature == 'default'
+      run: cargo build
 
-    - name: Run tests on Windows
-      shell: cmd
-      run: |
-        if "%matrix.feature%"=="debug" (
-          cargo build --target %WASM_TARGET%
-        ) else if "%matrix.feature%"=="no_std" (
-          cargo build --no-default-features
-        ) else if "%matrix.feature%"=="debug" (
-          cargo build --features debug
-        ) else (
-          cargo test
-        )
-      if: runner.os == 'Windows'
+    - name: Build (Debug)
+      if: matrix.feature == 'debug'
+      run: cargo build --features debug
+
+    - name: Build (No std)
+      if: matrix.feature == 'no-std'
+      run: cargo build --no-default-features
+
+    - name: Build (WASM)
+      if: matrix.feature == 'wasm'
+      run: cargo build --target wasm32-unknown-unknown
+    
+    - name: Run tests
+      run: cargo test
 
     - name: Run Clippy (Linter)
       run: cargo clippy
