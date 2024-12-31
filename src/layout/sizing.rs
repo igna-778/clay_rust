@@ -72,10 +72,98 @@ impl From<Sizing> for Clay_SizingAxis {
             },
             Sizing::Percent(percent) => Self {
                 type_: SizingType::Percent as _,
-                size: Clay_SizingAxis__bindgen_ty_1 {
-                    percent: percent,
-                },
+                size: Clay_SizingAxis__bindgen_ty_1 { percent: percent },
             },
         }
+    }
+}
+
+/// Shorthand to create a [`Sizing::Fit`] value. Excluding the `$max` value sets it to `f32::MAX`.
+#[macro_export]
+macro_rules! fit {
+    ($min:expr, $max:expr) => {
+        $crate::layout::sizing::Sizing::Fit($min, $max)
+    };
+
+    ($min:expr) => {
+        fit!($min, f32::MAX)
+    };
+
+    () => {
+        fit!(0.0)
+    };
+}
+
+/// Shorthand to create a [`Sizing::Grow`] value. Excluding the `$max` value sets it to `f32::MAX`.
+#[macro_export]
+macro_rules! grow {
+    ($min:expr, $max:expr) => {
+        $crate::layout::sizing::Sizing::Grow($min, $max)
+    };
+
+    ($min:expr) => {
+        grow!($min, f32::MAX)
+    };
+
+    () => {
+        grow!(0.0)
+    };
+}
+
+/// Shorthand to create a [`Sizing::Fixed`] value.
+#[macro_export]
+macro_rules! fixed {
+    ($val:expr) => {
+        $crate::layout::sizing::Sizing::Fixed($val)
+    };
+}
+
+/// Shorthand to create a [`Sizing::Percent`] value.
+#[macro_export]
+macro_rules! percent {
+    ($percent:expr) => {
+        $crate::layout::sizing::Sizing::Percent($percent)
+    };
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    use crate::{fit, fixed, grow, percent};
+
+    #[test]
+    fn fit_macro() {
+        let both_args = fit!(12.0, 34.0);
+        assert!(matches!(both_args, Sizing::Fit(12.0, 34.0)));
+
+        let one_arg = fit!(12.0);
+        assert!(matches!(one_arg, Sizing::Fit(12.0, f32::MAX)));
+
+        let zero_args = fit!();
+        assert!(matches!(zero_args, Sizing::Fit(0.0, f32::MAX)));
+    }
+
+    #[test]
+    fn grow_macro() {
+        let both_args = grow!(12.0, 34.0);
+        assert!(matches!(both_args, Sizing::Grow(12.0, 34.0)));
+
+        let one_arg = grow!(12.0);
+        assert!(matches!(one_arg, Sizing::Grow(12.0, f32::MAX)));
+
+        let zero_args = grow!();
+        assert!(matches!(zero_args, Sizing::Grow(0.0, f32::MAX)));
+    }
+
+    #[test]
+    fn fixed_macro() {
+        let value = fixed!(123.0);
+        assert!(matches!(value, Sizing::Fixed(123.0)));
+    }
+
+    #[test]
+    fn percent_macro() {
+        let value = percent!(0.5);
+        assert!(matches!(value, Sizing::Percent(0.5)));
     }
 }
