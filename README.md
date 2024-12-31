@@ -1,7 +1,10 @@
+[![Build Status](https://github.com/clay-ui-rs/clay/actions/workflows/ci.yaml/badge.svg)](https://github.com/clay-ui-rs/clay/actions?workflow=Rust%20CI)
+[![Crates.io](https://img.shields.io/crates/v/clay-layout.svg)](https://crates.io/crates/clay-layout)
+[![Documentation](https://docs.rs/clay-layout/badge.svg)](https://docs.rs/clay-layout)
+
 # Clay Rust Bindings
 
 Rust bindings for [Clay](https://github.com/nicbarker/clay), a UI layout library written in C.
-
 
 ## Support
 
