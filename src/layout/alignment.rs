@@ -45,3 +45,9 @@ impl From<Alignment> for Clay_ChildAlignment {
         }
     }
 }
+
+impl From<(LayoutAlignmentX, LayoutAlignmentY)> for Alignment {
+    fn from(other: (LayoutAlignmentX, LayoutAlignmentY)) -> Self {
+        Self::new(other.0, other.1)
+    }
+}

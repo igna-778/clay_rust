@@ -28,3 +28,9 @@ impl From<Padding> for Clay_Padding {
         }
     }
 }
+
+impl From<(u16, u16)> for Padding {
+    fn from(other: (u16, u16)) -> Self {
+        Self::new(other.0, other.1)
+    }
+}
