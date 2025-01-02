@@ -24,6 +24,12 @@ impl From<Vector2> for Clay_Vector2 {
     }
 }
 
+impl From<(f32, f32)> for Vector2 {
+    fn from(value: (f32, f32)) -> Self {
+        Self::new(value.0, value.1)
+    }
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Default)]
 #[repr(C)]
 pub struct Dimensions {
@@ -45,6 +51,12 @@ impl From<Clay_Dimensions> for Dimensions {
 impl From<Dimensions> for Clay_Dimensions {
     fn from(value: Dimensions) -> Self {
         unsafe { core::mem::transmute(value) }
+    }
+}
+
+impl From<(f32, f32)> for Dimensions {
+    fn from(value: (f32, f32)) -> Self {
+        Self::new(value.0, value.1)
     }
 }
 

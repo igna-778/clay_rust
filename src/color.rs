@@ -45,3 +45,25 @@ impl From<Color> for Clay_Color {
         unsafe { core::mem::transmute(value) }
     }
 }
+
+impl From<(f32, f32, f32)> for Color {
+    fn from(value: (f32, f32, f32)) -> Self {
+        Self::rgb(value.0, value.1, value.2)
+    }
+}
+impl From<(f32, f32, f32, f32)> for Color {
+    fn from(value: (f32, f32, f32, f32)) -> Self {
+        Self::rgba(value.0, value.1, value.2, value.3)
+    }
+}
+
+impl From<(u8, u8, u8)> for Color {
+    fn from(value: (u8, u8, u8)) -> Self {
+        Self::u_rgb(value.0, value.1, value.2)
+    }
+}
+impl From<(u8, u8, u8, u8)> for Color {
+    fn from(value: (u8, u8, u8, u8)) -> Self {
+        Self::u_rgba(value.0, value.1, value.2, value.3)
+    }
+}

@@ -1,15 +1,13 @@
 use clay_layout::{
-    color::Color,
     elements::{rectangle::Rectangle, CornerRadius},
-    id::Id,
-    layout::{sizing::Sizing, Layout},
-    math::Dimensions,
+    fixed,
+    layout::Layout,
     Clay,
 };
 
 fn main() {
     // Create the clay instance
-    let clay = Clay::new(Dimensions::new(800., 600.));
+    let clay = Clay::new((800., 600.).into());
 
     // Begin the layout
     clay.begin();
@@ -18,14 +16,11 @@ fn main() {
     // The Layout makes the rectangle have a width and height of 50.
     clay.with(
         [
-            Layout::new()
-                .width(Sizing::Fixed(50.))
-                .height(Sizing::Fixed(50.))
-                .end(),
+            Layout::new().width(fixed!(50.)).height(fixed!(50.)).end(),
             Rectangle::new()
-                .color(Color::u_rgb(0xFF, 0x00, 0x00))
+                .color((0xFF, 0x00, 0x00).into())
                 .corner_radius(CornerRadius::All(5.))
-                .end(Id::new("Red Rectangle")),
+                .end("Red Rectangle".into()),
         ],
         |_| {},
     );

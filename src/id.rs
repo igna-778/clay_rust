@@ -41,3 +41,9 @@ impl From<Clay_ElementId> for Id<'_> {
         }
     }
 }
+
+impl<'a> From<&'a str> for Id<'a> {
+    fn from(value: &'a str) -> Self {
+        Self::new(value)
+    }
+}
