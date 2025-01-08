@@ -141,14 +141,14 @@ impl<'a> Clay<'a> {
     /// **Use only if you know what you are doing or your getting errors from clay**
     pub fn max_element_count(&self, max_element_count: u32) {
         unsafe {
-            Clay_SetMaxElementCount(max_element_count);
+            Clay_SetMaxElementCount(max_element_count as _);
         }
     }
     /// Sets the capacity of the cache used for text in the measure text function
     /// **Use only if you know what you are doing or your getting errors from clay**
     pub fn max_measure_text_cache_word_count(&self, count: u32) {
         unsafe {
-            Clay_SetMaxElementCount(count);
+            Clay_SetMaxElementCount(count as _);
         }
     }
 
@@ -265,10 +265,7 @@ impl From<Clay_String> for &str {
 mod tests {
     use color::Color;
     use elements::{
-        containers::{border::BorderContainer, floating::FloatingContainer},
-        rectangle::Rectangle,
-        text::Text,
-        CornerRadius,
+        containers::border::BorderContainer, rectangle::Rectangle, text::Text, CornerRadius,
     };
     use id::Id;
     use layout::{padding::Padding, sizing::Sizing, Layout};
