@@ -579,15 +579,6 @@ pub struct Clay_CornerRadius {
     pub bottomLeft: f32,
     pub bottomRight: f32,
 }
-pub const Clay__ElementConfigType_CLAY__ELEMENT_CONFIG_TYPE_NONE: Clay__ElementConfigType = 0;
-pub const Clay__ElementConfigType_CLAY__ELEMENT_CONFIG_TYPE_BORDER: Clay__ElementConfigType = 1;
-pub const Clay__ElementConfigType_CLAY__ELEMENT_CONFIG_TYPE_FLOATING: Clay__ElementConfigType = 2;
-pub const Clay__ElementConfigType_CLAY__ELEMENT_CONFIG_TYPE_SCROLL: Clay__ElementConfigType = 3;
-pub const Clay__ElementConfigType_CLAY__ELEMENT_CONFIG_TYPE_IMAGE: Clay__ElementConfigType = 4;
-pub const Clay__ElementConfigType_CLAY__ELEMENT_CONFIG_TYPE_TEXT: Clay__ElementConfigType = 5;
-pub const Clay__ElementConfigType_CLAY__ELEMENT_CONFIG_TYPE_CUSTOM: Clay__ElementConfigType = 6;
-pub const Clay__ElementConfigType_CLAY__ELEMENT_CONFIG_TYPE_SHARED: Clay__ElementConfigType = 7;
-pub type Clay__ElementConfigType = ::core::ffi::c_uchar;
 pub const Clay_LayoutDirection_CLAY_LEFT_TO_RIGHT: Clay_LayoutDirection = 0;
 pub const Clay_LayoutDirection_CLAY_TOP_TO_BOTTOM: Clay_LayoutDirection = 1;
 pub type Clay_LayoutDirection = ::core::ffi::c_uchar;
@@ -669,6 +660,10 @@ pub const Clay_TextElementConfigWrapMode_CLAY_TEXT_WRAP_NEWLINES: Clay_TextEleme
     1;
 pub const Clay_TextElementConfigWrapMode_CLAY_TEXT_WRAP_NONE: Clay_TextElementConfigWrapMode = 2;
 pub type Clay_TextElementConfigWrapMode = ::core::ffi::c_uchar;
+pub const Clay_TextAlignment_CLAY_TEXT_ALIGN_LEFT: Clay_TextAlignment = 0;
+pub const Clay_TextAlignment_CLAY_TEXT_ALIGN_CENTER: Clay_TextAlignment = 1;
+pub const Clay_TextAlignment_CLAY_TEXT_ALIGN_RIGHT: Clay_TextAlignment = 2;
+pub type Clay_TextAlignment = ::core::ffi::c_uchar;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct Clay_TextElementConfig {
@@ -678,6 +673,7 @@ pub struct Clay_TextElementConfig {
     pub letterSpacing: u16,
     pub lineHeight: u16,
     pub wrapMode: Clay_TextElementConfigWrapMode,
+    pub textAlignment: Clay_TextAlignment,
     pub hashStringContents: bool,
 }
 #[repr(C)]
@@ -769,18 +765,6 @@ pub struct Clay__Clay_ScrollElementConfigWrapper {
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
-pub struct Clay_SharedElementConfig {
-    pub backgroundColor: Clay_Color,
-    pub cornerRadius: Clay_CornerRadius,
-    pub userData: *mut ::core::ffi::c_void,
-}
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct Clay__Clay_SharedElementConfigWrapper {
-    pub wrapped: Clay_SharedElementConfig,
-}
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
 pub struct Clay_BorderWidth {
     pub left: u16,
     pub right: u16,
@@ -832,6 +816,12 @@ pub struct Clay_CustomRenderData {
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
+pub struct Clay_ScrollRenderData {
+    pub horizontal: bool,
+    pub vertical: bool,
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
 pub struct Clay_BorderRenderData {
     pub color: Clay_Color,
     pub cornerRadius: Clay_CornerRadius,
@@ -845,6 +835,7 @@ pub union Clay_RenderData {
     pub image: Clay_ImageRenderData,
     pub custom: Clay_CustomRenderData,
     pub border: Clay_BorderRenderData,
+    pub scroll: Clay_ScrollRenderData,
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -927,7 +918,8 @@ pub const Clay_ErrorType_CLAY_ERROR_TYPE_ELEMENTS_CAPACITY_EXCEEDED: Clay_ErrorT
 pub const Clay_ErrorType_CLAY_ERROR_TYPE_TEXT_MEASUREMENT_CAPACITY_EXCEEDED: Clay_ErrorType = 3;
 pub const Clay_ErrorType_CLAY_ERROR_TYPE_DUPLICATE_ID: Clay_ErrorType = 4;
 pub const Clay_ErrorType_CLAY_ERROR_TYPE_FLOATING_CONTAINER_PARENT_NOT_FOUND: Clay_ErrorType = 5;
-pub const Clay_ErrorType_CLAY_ERROR_TYPE_INTERNAL_ERROR: Clay_ErrorType = 6;
+pub const Clay_ErrorType_CLAY_ERROR_TYPE_PERCENTAGE_OVER_1: Clay_ErrorType = 6;
+pub const Clay_ErrorType_CLAY_ERROR_TYPE_INTERNAL_ERROR: Clay_ErrorType = 7;
 pub type Clay_ErrorType = ::core::ffi::c_uchar;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -949,7 +941,7 @@ unsafe extern "C" {
 unsafe extern "C" {
     pub fn Clay_CreateArenaWithCapacityAndMemory(
         capacity: u32,
-        offset: *mut ::core::ffi::c_void,
+        memory: *mut ::core::ffi::c_void,
     ) -> Clay_Arena;
 }
 unsafe extern "C" {
@@ -1015,11 +1007,6 @@ unsafe extern "C" {
     pub fn Clay_GetScrollContainerData(id: Clay_ElementId) -> Clay_ScrollContainerData;
 }
 unsafe extern "C" {
-    pub fn Clay__StoreTextElementConfig(
-        config: Clay_TextElementConfig,
-    ) -> *mut Clay_TextElementConfig;
-}
-unsafe extern "C" {
     pub fn Clay_SetMeasureTextFunction(
         measureTextFunction: ::core::option::Option<
             unsafe extern "C" fn(
@@ -1082,16 +1069,15 @@ unsafe extern "C" {
     pub fn Clay__CloseElement();
 }
 unsafe extern "C" {
-    pub fn Clay__StoreLayoutConfig(config: Clay_LayoutConfig) -> *mut Clay_LayoutConfig;
-}
-unsafe extern "C" {
-    pub fn Clay__AttachId(id: Clay_ElementId) -> Clay_ElementId;
-}
-unsafe extern "C" {
     pub fn Clay__HashString(key: Clay_String, offset: u32, seed: u32) -> Clay_ElementId;
 }
 unsafe extern "C" {
     pub fn Clay__OpenTextElement(text: Clay_String, textConfig: *mut Clay_TextElementConfig);
+}
+unsafe extern "C" {
+    pub fn Clay__StoreTextElementConfig(
+        config: Clay_TextElementConfig,
+    ) -> *mut Clay_TextElementConfig;
 }
 unsafe extern "C" {
     pub fn Clay__GetParentElementId() -> u32;
