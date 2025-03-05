@@ -24,3 +24,10 @@ debug = []
 [dependencies]
 skia-safe = { version = "0.82.0", features = ["gl"], optional = true }
 raylib = { version = "5.0.2", optional = true }
+
+[dev-dependencies]
+winit = "0.30.9"
+wgpu = "24.0.1"
+pollster = "0.2"
+bytemuck = { version = "1.16", features = [ "derive" ] }
+glyphon = "0.8.0"
