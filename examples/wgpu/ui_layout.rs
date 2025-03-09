@@ -103,7 +103,7 @@ pub fn create_layout<'render>(
     user_data: &mut ClayState,
     time_delta: f32,
 ) -> impl Iterator<Item = RenderCommand<'render, (), ()>> {
-    clay.layout_dimensions(user_data.size.into());
+    clay.set_layout_dimensions(user_data.size.into());
     clay.pointer_state(user_data.mouse_position.into(), false);
     clay.update_scroll_containers(false, user_data.scroll_delta.into(), time_delta);
 

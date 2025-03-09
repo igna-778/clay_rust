@@ -8,14 +8,14 @@ pub mod id;
 pub mod layout;
 pub mod math;
 pub mod render_commands;
-pub mod renderers;
 pub mod text;
 
 mod mem;
+pub mod renderers;
 
 use core::marker::PhantomData;
 
-use crate::bindings::*;
+pub use crate::bindings::*;
 use errors::Error;
 use id::Id;
 use math::{BoundingBox, Dimensions, Vector2};
@@ -62,7 +62,7 @@ impl<'render, ImageElementData: 'render, CustomElementData: 'render>
 
     #[inline]
     pub fn custom_element(&mut self, data: &'render CustomElementData) -> &mut Self {
-        self.inner.custom.customData = (data as *const CustomElementData).cast();
+        self.inner.custom.customData = data as *const CustomElementData as _;
         self
     }
 
@@ -178,10 +178,7 @@ pub struct ClayLayoutScope<'clay, 'render, ImageElementData, CustomElementData> 
 impl<'render, 'clay: 'render, ImageElementData: 'render, CustomElementData: 'render>
     ClayLayoutScope<'clay, 'render, ImageElementData, CustomElementData>
 {
-    /// Create an element, passing it's config and a function to add childrens
-    /// ```
-    /// // TODO: Add Example
-    /// ```
+    /// Create an element, passing its config and a function to add childrens
     pub fn with<
         F: FnOnce(&mut ClayLayoutScope<'clay, 'render, ImageElementData, CustomElementData>),
     >(
@@ -204,11 +201,11 @@ impl<'render, 'clay: 'render, ImageElementData: 'render, CustomElementData: 'ren
 
     pub fn with_styling<
         G: FnOnce(
-            &mut ClayLayoutScope<'clay, 'render, ImageElementData, CustomElementData>,
+            &ClayLayoutScope<'clay, 'render, ImageElementData, CustomElementData>,
         ) -> Declaration<'render, ImageElementData, CustomElementData>,
-        F: FnOnce(&mut ClayLayoutScope<'clay, 'render, ImageElementData, CustomElementData>),
+        F: FnOnce(&ClayLayoutScope<'clay, 'render, ImageElementData, CustomElementData>),
     >(
-        &mut self,
+        &self,
         g: G,
         f: F,
     ) {
@@ -231,7 +228,7 @@ impl<'render, 'clay: 'render, ImageElementData: 'render, CustomElementData: 'ren
     }
 
     pub fn end(
-        mut self,
+        &mut self,
     ) -> impl Iterator<Item = RenderCommand<'render, ImageElementData, CustomElementData>> {
         let array = unsafe { Clay_EndLayout() };
         self.dropped = true;
@@ -286,6 +283,7 @@ impl<'render, 'clay: 'render, ImageElementData: 'render, CustomElementData: 'ren
         unsafe { Clay_PointerOver(cfg.id) }
     }
 }
+
 impl<ImageElementData, CustomElementData> Drop
     for ClayLayoutScope<'_, '_, ImageElementData, CustomElementData>
 {
@@ -297,6 +295,7 @@ impl<ImageElementData, CustomElementData> Drop
         }
     }
 }
+
 impl Clay {
     pub fn begin<'render, ImageElementData: 'render, CustomElementData: 'render>(
         &mut self,
@@ -434,14 +433,14 @@ impl Clay {
     }
     /// Sets the capacity of the cache used for text in the measure text function
     /// **Use only if you know what you are doing or your getting errors from clay**
-    pub fn max_measure_text_cache_word_count(&mut self, count: u32) {
+    pub fn max_measure_text_cache_word_count(&self, count: u32) {
         unsafe {
             Clay_SetMaxElementCount(count as _);
         }
     }
 
     /// Enables or disables the debug mode of clay
-    pub fn enable_debug_mode(&mut self, enable: bool) {
+    pub fn set_debug_mode(&self, enable: bool) {
         unsafe {
             Clay_SetDebugModeEnabled(enable);
         }
@@ -449,26 +448,39 @@ impl Clay {
 
     /// Sets the dimensions of the global layout, use if, for example the window size you render to
     /// changed
-    pub fn layout_dimensions(&mut self, dimensions: Dimensions) {
+    pub fn set_layout_dimensions(&self, dimensions: Dimensions) {
         unsafe {
             Clay_SetLayoutDimensions(dimensions.into());
         }
     }
     /// Updates the state of the pointer for clay. Used to update scroll containers and for
     /// interactions functions
-    pub fn pointer_state(&mut self, position: Vector2, is_down: bool) {
+    pub fn pointer_state(&self, position: Vector2, is_down: bool) {
         unsafe {
             Clay_SetPointerState(position.into(), is_down);
         }
     }
     pub fn update_scroll_containers(
-        &mut self,
+        &self,
         drag_scrolling_enabled: bool,
         scroll_delta: Vector2,
         delta_time: f32,
     ) {
         unsafe {
             Clay_UpdateScrollContainers(drag_scrolling_enabled, scroll_delta.into(), delta_time);
+        }
+    }
+
+    pub fn scroll_container_data(&self, id: Id) -> Option<Clay_ScrollContainerData> {
+        unsafe {
+            Clay_SetCurrentContext(self.context);
+            let scroll_container_data = Clay_GetScrollContainerData(id.id);
+
+            if scroll_container_data.found {
+                Some(scroll_container_data)
+            } else {
+                None
+            }
         }
     }
 
@@ -481,12 +493,12 @@ impl Clay {
         unsafe { Clay_PointerOver(cfg.id) }
     }
 
-    fn get_element_data(id: Id) -> Clay_ElementData {
+    fn element_data(id: Id) -> Clay_ElementData {
         unsafe { Clay_GetElementData(id.id) }
     }
 
-    pub fn get_bounding_box(&self, id: Id) -> Option<BoundingBox> {
-        let element_data = Self::get_element_data(id);
+    pub fn bounding_box(&self, id: Id) -> Option<BoundingBox> {
+        let element_data = Self::element_data(id);
 
         if element_data.found {
             Some(element_data.boundingBox.into())
