@@ -246,38 +246,6 @@ impl<'render, 'clay: 'render, ImageElementData: 'render, CustomElementData: 'ren
             .map(|command| unsafe { RenderCommand::from_clay_render_command(*command) })
     }
 
-    /// Generates a unique ID based on the given `label`.
-    ///
-    /// This ID is global and must be unique across the entire scope.
-    #[inline]
-    pub fn id(&self, label: &'render str) -> id::Id {
-        id::Id::new(label)
-    }
-
-    /// Generates a unique indexed ID based on the given `label` and `index`.
-    ///
-    /// This is useful when multiple elements share the same label but need distinct IDs.
-    #[inline]
-    pub fn id_index(&self, label: &'render str, index: u32) -> id::Id {
-        id::Id::new_index(label, index)
-    }
-
-    /// Generates a locally unique ID based on the given `label`.
-    ///
-    /// The ID is unique within a specific local scope but not globally.
-    #[inline]
-    pub fn id_local(&self, label: &'render str) -> id::Id {
-        id::Id::new_index_local(label, 0)
-    }
-
-    /// Generates a locally unique indexed ID based on the given `label` and `index`.
-    ///
-    /// This is useful for differentiating elements within a local scope while keeping their labels consistent.
-    #[inline]
-    pub fn id_index_local(&self, label: &'render str, index: u32) -> id::Id {
-        id::Id::new_index_local(label, index)
-    }
-
     /// Adds a text element to the current open element or to the root layout
     pub fn text(&self, text: &'render str, config: TextElementConfig) {
         unsafe { Clay__OpenTextElement(text.into(), config.into()) };
@@ -287,19 +255,26 @@ impl<'render, 'clay: 'render, ImageElementData: 'render, CustomElementData: 'ren
         unsafe { Clay_Hovered() }
     }
 
-    pub fn pointer_over(&self, cfg: Id) -> bool {
-        unsafe { Clay_PointerOver(cfg.id) }
-    }
-
-    pub fn scroll_container_data(&self, id: Id) -> Option<Clay_ScrollContainerData> {
-        self.clay.scroll_container_data(id)
-    }
-    pub fn bounding_box(&self, id: Id) -> Option<BoundingBox> {
-        self.clay.bounding_box(id)
-    }
-
     pub fn scroll_offset(&self) -> Vector2 {
         unsafe { Clay_GetScrollOffset().into() }
+    }
+}
+
+impl<'clay, 'render, ImageElementData, CustomElementData> core::ops::Deref
+    for ClayLayoutScope<'clay, 'render, ImageElementData, CustomElementData>
+{
+    type Target = Clay;
+
+    fn deref(&self) -> &Self::Target {
+        self.clay
+    }
+}
+
+impl<'clay, 'render, ImageElementData, CustomElementData> core::ops::DerefMut
+    for ClayLayoutScope<'clay, 'render, ImageElementData, CustomElementData>
+{
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        self.clay
     }
 }
 
@@ -352,6 +327,42 @@ impl Clay {
             context,
             text_measure_callback: None,
         }
+    }
+
+    /// Generates a unique ID based on the given `label`.
+    ///
+    /// This ID is global and must be unique across the entire scope.
+    #[inline]
+    pub fn id(&self, label: &str) -> id::Id {
+        id::Id::new(label)
+    }
+
+    /// Generates a unique indexed ID based on the given `label` and `index`.
+    ///
+    /// This is useful when multiple elements share the same label but need distinct IDs.
+    #[inline]
+    pub fn id_index(&self, label: &str, index: u32) -> id::Id {
+        id::Id::new_index(label, index)
+    }
+
+    /// Generates a locally unique ID based on the given `label`.
+    ///
+    /// The ID is unique within a specific local scope but not globally.
+    #[inline]
+    pub fn id_local(&self, label: &str) -> id::Id {
+        id::Id::new_index_local(label, 0)
+    }
+
+    /// Generates a locally unique indexed ID based on the given `label` and `index`.
+    ///
+    /// This is useful for differentiating elements within a local scope while keeping their labels consistent.
+    #[inline]
+    pub fn id_index_local(&self, label: &str, index: u32) -> id::Id {
+        id::Id::new_index_local(label, index)
+    }
+
+    pub fn pointer_over(&self, cfg: Id) -> bool {
+        unsafe { Clay_PointerOver(cfg.id) }
     }
 
     #[cfg(not(feature = "std"))]
@@ -496,10 +507,6 @@ impl Clay {
         unsafe { Clay_Hovered() }
     }
 
-    pub fn pointer_over(&self, cfg: Id) -> bool {
-        unsafe { Clay_PointerOver(cfg.id) }
-    }
-
     fn element_data(id: Id) -> Clay_ElementData {
         unsafe { Clay_GetElementData(id.id) }
     }
@@ -612,7 +619,7 @@ mod tests {
                     .height(Sizing::Fixed(100.0))
                     .padding(Padding::all(10))
                     .end()
-                .background_color(Color::rgb(255., 255., 255.)), |clay| 
+                .background_color(Color::rgb(255., 255., 255.)), |clay|
             {
                 clay.with(&Declaration::new()
                     .id(clay.id("rect_under_rect"))
@@ -621,7 +628,7 @@ mod tests {
                         .height(Sizing::Fixed(100.0))
                         .padding(Padding::all(10))
                         .end()
-                    .background_color(Color::rgb(255., 255., 255.)), |clay| 
+                    .background_color(Color::rgb(255., 255., 255.)), |clay|
                     {
                         clay.text("test", TextConfig::new()
                             .color(Color::rgb(255., 255., 255.))
