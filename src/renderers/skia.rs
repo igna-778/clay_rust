@@ -49,16 +49,46 @@ pub fn clay_skia_render<'a, CustomElementData: 'a>(
                 paint.set_color(Color::WHITE);
                 paint.set_anti_alias(true);
 
+                let bounds = clay_to_skia_rect(command.bounding_box);
+                let has_border_radius = image.corner_radii.top_left > 0.
+                    || image.corner_radii.top_right > 0.
+                    || image.corner_radii.bottom_left > 0.
+                    || image.corner_radii.bottom_right > 0.;
+                if has_border_radius {
+                    canvas.save();
+                    let rrect = RRect::new_rect_radii(
+                        bounds,
+                        &[
+                            Point::new(image.corner_radii.top_left, image.corner_radii.top_left),
+                            Point::new(image.corner_radii.top_right, image.corner_radii.top_right),
+                            Point::new(
+                                image.corner_radii.bottom_left,
+                                image.corner_radii.bottom_left,
+                            ),
+                            Point::new(
+                                image.corner_radii.bottom_right,
+                                image.corner_radii.bottom_right,
+                            ),
+                        ],
+                    );
+                    canvas.clip_rrect(rrect, ClipOp::Intersect, true);
+                }
+
                 canvas.draw_image_rect_with_sampling_options(
                     skia_image,
                     None,
-                    clay_to_skia_rect(command.bounding_box),
+                    bounds,
                     SamplingOptions::new(
                         skia_safe::FilterMode::Linear,
                         skia_safe::MipmapMode::Linear,
                     ),
                     &paint,
                 );
+
+                // Restore canvas state if we applied a clip
+                if has_border_radius {
+                    canvas.restore();
+                }
             }
 
             RenderCommandConfig::ScissorStart() => {
