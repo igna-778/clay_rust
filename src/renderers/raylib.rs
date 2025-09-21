@@ -30,24 +30,34 @@ macro_rules! clay_to_raylib_rect {
 pub fn clay_raylib_render<'rl, 'a, CustomElementData: 'a>(
     d: &mut RaylibDrawHandle<'rl>,
     render_commands: impl Iterator<Item = RenderCommand<'a, Texture2D, CustomElementData>>,
-    fonts : &[Font],
+    fonts: &[Font],
     mut handle_custom_element: impl FnMut(&CustomElementData, &mut RaylibDrawHandle<'rl>),
 ) {
     for command in render_commands {
         match command.config {
             RenderCommandConfig::Text(text) => {
                 let text_data = text.text;
-                d.draw_text_ex(
-                    fonts.get(text.font_id as usize).unwrap(),
-                    text_data,
-                    Vector2 {
-                        x: command.bounding_box.x,
-                        y: command.bounding_box.y,
-                    },
-                    text.letter_spacing as f32,
-                    text.font_size.into(),
-                    clay_to_raylib_color!(text.color),
-                );
+                if let Some(font) = fonts.get(text.font_id as usize) {
+                    d.draw_text_ex(
+                        font,
+                        text_data,
+                        Vector2 {
+                            x: command.bounding_box.x,
+                            y: command.bounding_box.y
+                        },
+                        text.font_size.into(),
+                        text.letter_spacing.into(),
+                        clay_to_raylib_color!(text.color),
+                    );
+                } else {
+                    d.draw_text(
+                        text_data,
+                        command.bounding_box.x as i32,
+                        command.bounding_box.y as i32,
+                        text.font_size.into(),
+                        clay_to_raylib_color!(text.color),
+                    );
+                }
             }
 
             RenderCommandConfig::Image(image) => {
@@ -83,10 +93,10 @@ pub fn clay_raylib_render<'rl, 'a, CustomElementData: 'a>(
                 if rect.corner_radii.top_left > 0. {
                     let radius = (rect.corner_radii.top_left * 2.)
                         / if command.bounding_box.width > command.bounding_box.height {
-                            command.bounding_box.height
-                        } else {
-                            command.bounding_box.width
-                        };
+                        command.bounding_box.height
+                    } else {
+                        command.bounding_box.width
+                    };
 
                     d.draw_rectangle_rounded(
                         clay_to_raylib_rect!(command.bounding_box),
