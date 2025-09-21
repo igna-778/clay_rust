@@ -7,7 +7,7 @@ fi
 
 : "${CLAY_HEADER_PATH:=clay.h}"
 
-COMMON_BINDGEN_FLAGS="--use-core --no-layout-tests --blocklist-file .*stdlib.* --blocklist-file .*pthread.* --blocklist-file .*glibc.* --blocklist-file .*pthread_rwlock.*" 
+COMMON_BINDGEN_FLAGS="--use-core --no-layout-tests --blocklist-type .*stdlib.* --blocklist-type .*pthread.* --blocklist-type .*glibc.* --blocklist-type .*pthread_rwlock.*"
 
 bindgen $CLAY_HEADER_PATH -o src/bindings/bindings.rs $COMMON_BINDGEN_FLAGS 
 echo "Generated src/bindings/bindings.rs"
