@@ -38,7 +38,7 @@ pub fn clay_raylib_render<'rl, 'a, CustomElementData: 'a>(
             RenderCommandConfig::Text(text) => {
                 let text_data = text.text;
                 d.draw_text_ex(
-                    fonts.get(text.font_id),
+                    fonts.get(text.font_id as usize).unwrap(),
                     text_data,
                     Vector2 {
                         x: command.bounding_box.x,
