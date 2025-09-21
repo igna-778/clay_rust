@@ -30,16 +30,21 @@ macro_rules! clay_to_raylib_rect {
 pub fn clay_raylib_render<'rl, 'a, CustomElementData: 'a>(
     d: &mut RaylibDrawHandle<'rl>,
     render_commands: impl Iterator<Item = RenderCommand<'a, Texture2D, CustomElementData>>,
+    fonts : &[Font],
     mut handle_custom_element: impl FnMut(&CustomElementData, &mut RaylibDrawHandle<'rl>),
 ) {
     for command in render_commands {
         match command.config {
             RenderCommandConfig::Text(text) => {
                 let text_data = text.text;
-                d.draw_text(
+                d.draw_text_ex(
+                    fonts.get(text.font_id),
                     text_data,
-                    command.bounding_box.x as i32,
-                    command.bounding_box.y as i32,
+                    Vector2 {
+                        x: command.bounding_box.x,
+                        y: command.bounding_box.y,
+                    },
+                    text.letter_spacing as f32,
                     text.font_size.into(),
                     clay_to_raylib_color!(text.color),
                 );
