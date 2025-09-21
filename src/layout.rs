@@ -1,3 +1,5 @@
+use std::fmt::{format, Debug, Formatter};
+use std::os::raw::c_void;
 use crate::{bindings::*, Declaration};
 
 /// Defines different sizing behaviors for an element.
@@ -12,10 +14,11 @@ pub enum SizingType {
     Percent = Clay__SizingType_CLAY__SIZING_TYPE_PERCENT,
     /// The element's size is set to a fixed value.
     Fixed = Clay__SizingType_CLAY__SIZING_TYPE_FIXED,
+    /// The element's size is related to its width
+    Constrained = Clay__SizingType_CLAY__SIZING_TYPE_CONSTRAINED,
 }
 
 /// Represents different sizing strategies for layout elements.
-#[derive(Debug, Clone, Copy)]
 pub enum Sizing {
     /// Fits the element’s width/height within a min and max constraint.
     Fit(f32, f32),
@@ -25,6 +28,20 @@ pub enum Sizing {
     Fixed(f32),
     /// Sets width/height as a percentage of its parent. Value should be between `0.0` and `1.0`.
     Percent(f32),
+    /// Sets the height to be dependent by the width
+    Constrained(Box<dyn Fn(f32) -> f32>),
+}
+
+impl Debug for Sizing {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Sizing::Constrained(_) => { f.write_str("Constrained") },
+            Sizing::Fit(min,max) => { f.write_str(&format!("Fit({min},{max})")) },
+            Sizing::Grow(min,max) => { f.write_str(&format!("Grow({min},{max})")) },
+            Sizing::Fixed(val) => { f.write_str(&format!("Fixed({val})")) },
+            Sizing::Percent(val) => { f.write_str(&format!("Percent({val})")) },
+        }
+    }
 }
 
 /// Converts a `Sizing` value into a `Clay_SizingAxis` representation.
@@ -56,8 +73,40 @@ impl From<Sizing> for Clay_SizingAxis {
                 type_: SizingType::Percent as _,
                 size: Clay_SizingAxis__bindgen_ty_1 { percent },
             },
+            Sizing::Constrained(fun) => {
+                let (fun, user_data) = to_c_callback(fun);
+                Self {
+                    type_: SizingType::Constrained as _,
+                    size: Clay_SizingAxis__bindgen_ty_1 {
+                        constrained: Clay_SizingConstrained { fun, userData: user_data },
+                    }
+                }
+            }
         }
     }
+}
+
+type ConstrainedFuncitionType = unsafe extern "C" fn(f32, *mut c_void) -> f32;
+
+unsafe extern "C" fn trampoline(arg: f32, data: *mut c_void) -> f32 {
+    // Safety: caller must ensure `data` is a valid pointer to Fn(f32)->f32
+    let mut closure = unsafe { std::mem::transmute::<*mut c_void, *mut Box<dyn Fn(f32) -> f32>>(data) };
+    let res = closure.as_ref().unwrap() (arg);
+
+    // IMPORTANT: cleanup to avoid leaks
+    unsafe {
+        drop(Box::from_raw(data as *mut Box<dyn Fn(f32) -> f32>));
+    }
+    res
+}
+
+fn to_c_callback<F>(f: F) -> (Option<ConstrainedFuncitionType>, *mut c_void)
+where
+    F: Fn(f32) -> f32 + 'static,
+{
+    let boxed: Box<dyn Fn(f32) -> f32> = Box::new(Box::new(f));
+    let raw = Box::into_raw(boxed);
+    (Some(trampoline), raw as *mut c_void)
 }
 
 /// Represents padding values for each side of an element.
@@ -220,6 +269,8 @@ impl<'declaration, 'render, ImageElementData: 'render, CustomElementData: 'rende
     /// Returns the modified `Declaration`.
     #[inline]
     pub fn end(&mut self) -> &mut Declaration<'render, ImageElementData, CustomElementData> {
+        if self.parent.inner.layout.sizing.width.type_ == SizingType::Constrained as _ { panic!("Width sizing can not be constrained.") }
+        if self.parent.inner.layout.sizing.height.type_ == SizingType::Constrained as _ && self.parent.inner.layout.sizing.width.type_ == SizingType::Fit as _ { panic!("Constrained height sizing needs a fit width to work.") }
         self.parent
     }
 }
