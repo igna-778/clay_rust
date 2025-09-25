@@ -19,7 +19,7 @@ pub enum SizingType {
 }
 
 /// Represents different sizing strategies for layout elements.
-pub enum Sizing {
+pub enum Sizing<'render> {
     /// Fits the element’s width/height within a min and max constraint.
     Fit(f32, f32),
     /// Expands the element to fill available space within min/max constraints.
@@ -29,10 +29,10 @@ pub enum Sizing {
     /// Sets width/height as a percentage of its parent. Value should be between `0.0` and `1.0`.
     Percent(f32),
     /// Sets the height to be dependent by the width
-    Constrained(Box<dyn Fn(f32) -> f32>),
+    Constrained(Box<dyn Fn(f32) -> f32 + 'render>),
 }
 
-impl Debug for Sizing {
+impl Debug for Sizing<'_> {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match self {
             Sizing::Constrained(_) => { f.write_str("Constrained") },
@@ -45,7 +45,7 @@ impl Debug for Sizing {
 }
 
 /// Converts a `Sizing` value into a `Clay_SizingAxis` representation.
-impl From<Sizing> for Clay_SizingAxis {
+impl From<Sizing<'_>> for Clay_SizingAxis {
     fn from(value: Sizing) -> Self {
         match value {
             Sizing::Fit(min, max) => Self {
@@ -100,9 +100,9 @@ unsafe extern "C" fn trampoline(arg: f32, data: *mut c_void) -> f32 {
     res
 }
 
-fn to_c_callback<F>(f: F) -> (Option<ConstrainedFuncitionType>, *mut c_void)
+fn to_c_callback<'render,F>(f: F) -> (Option<ConstrainedFuncitionType>, *mut c_void)
 where
-    F: Fn(f32) -> f32 + 'static,
+    F: Fn(f32) -> f32 + 'render,
 {
     let boxed: Box<dyn Fn(f32) -> f32> = Box::new(Box::new(f));
     let raw = Box::into_raw(boxed);
