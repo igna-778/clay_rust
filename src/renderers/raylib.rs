@@ -31,7 +31,7 @@ pub fn clay_raylib_render<'rl, 'a, CustomElementData: 'a>(
     d: &mut RaylibDrawHandle<'rl>,
     render_commands: impl Iterator<Item = RenderCommand<'a, Texture2D, CustomElementData>>,
     fonts: &[Font],
-    mut handle_custom_element: impl FnMut(&CustomElementData, &mut RaylibDrawHandle<'rl>),
+    mut handle_custom_element: impl FnMut(RenderCommand<'a, Texture2D, CustomElementData> , &mut RaylibDrawHandle<'rl>),
 ) {
     for command in render_commands {
         match command.config {
@@ -238,7 +238,7 @@ pub fn clay_raylib_render<'rl, 'a, CustomElementData: 'a>(
                     );
                 }
             }
-            RenderCommandConfig::Custom(custom) => handle_custom_element(custom.data, &mut *d),
+            RenderCommandConfig::Custom(_) => handle_custom_element(command, &mut *d),
             RenderCommandConfig::None() => {}
         }
     }
