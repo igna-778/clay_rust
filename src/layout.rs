@@ -1,6 +1,7 @@
 use std::fmt::{format, Debug, Formatter};
 use std::os::raw::c_void;
 use crate::{bindings::*, Declaration};
+extern crate libc;
 
 /// Defines different sizing behaviors for an element.
 #[derive(Debug, Clone, Copy)]
@@ -88,15 +89,11 @@ impl From<Sizing<'_>> for Clay_SizingAxis {
 
 type ConstrainedFuncitionType = unsafe extern "C" fn(f32, *mut c_void) -> f32;
 
-unsafe extern "C" fn trampoline(arg: f32, data: *mut c_void) -> f32 {
+unsafe extern "C" fn trampoline(arg: f32, ptr: *mut c_void) -> f32 {
     // Safety: caller must ensure `data` is a valid pointer to Fn(f32)->f32
-    let mut closure = unsafe { std::mem::transmute::<*mut c_void, *mut Box<dyn Fn(f32) -> f32>>(data) };
-    let res = closure.as_ref().unwrap() (arg);
-
-    // IMPORTANT: cleanup to avoid leaks
-    unsafe {
-        drop(Box::from_raw(data as *mut Box<dyn Fn(f32) -> f32>));
-    }
+    let data = Box::from_raw(*(ptr as *mut *mut dyn Fn(f32) -> f32));
+    libc::free(ptr);
+    let res = data(arg);
     res
 }
 
@@ -105,8 +102,13 @@ where
     F: Fn(f32) -> f32 + 'render,
 {
     let boxed: Box<dyn Fn(f32) -> f32> = Box::new(Box::new(f));
-    let raw = Box::into_raw(boxed);
-    (Some(trampoline), raw as *mut c_void)
+    let ptr = unsafe { libc::malloc(size_of::<*mut dyn Fn(f32) -> f32>()) as *mut *mut dyn Fn(f32) -> f32 };
+    if ptr.is_null() {
+        panic!("failed to allocate memory");
+    }
+    let raw_box: *mut dyn Fn(f32) -> f32 = Box::into_raw(boxed);
+    unsafe { *ptr = raw_box }; // <- This is a fat pointer
+    (Some(trampoline), ptr as *mut c_void)
 }
 
 /// Represents padding values for each side of an element.
