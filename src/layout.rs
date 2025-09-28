@@ -1,7 +1,6 @@
-use std::fmt::{format, Debug, Formatter};
+use std::fmt::{Debug, Formatter};
 use std::os::raw::c_void;
 use crate::{bindings::*, Declaration};
-extern crate libc;
 
 /// Defines different sizing behaviors for an element.
 #[derive(Debug, Clone, Copy)]
@@ -91,9 +90,9 @@ type ConstrainedFuncitionType = unsafe extern "C" fn(f32, *mut c_void) -> f32;
 
 unsafe extern "C" fn trampoline(arg: f32, ptr: *mut c_void) -> f32 {
     // Safety: caller must ensure `data` is a valid pointer to Fn(f32)->f32
-    let data = Box::from_raw(*(ptr as *mut *mut dyn Fn(f32) -> f32));
-    libc::free(ptr);
-    let res = data(arg);
+    let raw_box = Box::from_raw(ptr as *mut *mut dyn Fn(f32) -> f32);
+    let boxed = Box::from_raw(*raw_box);
+    let res = boxed(arg);
     res
 }
 
@@ -101,13 +100,9 @@ fn to_c_callback<'render,F>(f: F) -> (Option<ConstrainedFuncitionType>, *mut c_v
 where
     F: Fn(f32) -> f32 + 'render,
 {
-    let boxed: Box<dyn Fn(f32) -> f32> = Box::new(Box::new(f));
-    let ptr = unsafe { libc::malloc(size_of::<*mut dyn Fn(f32) -> f32>()) as *mut *mut dyn Fn(f32) -> f32 };
-    if ptr.is_null() {
-        panic!("failed to allocate memory");
-    }
-    let raw_box: *mut dyn Fn(f32) -> f32 = Box::into_raw(boxed);
-    unsafe { *ptr = raw_box }; // <- This is a fat pointer
+    let boxed: Box<dyn Fn(f32) -> f32> = Box::new(f);
+    let raw_box: *mut dyn Fn(f32) -> f32 = Box::into_raw(boxed); // <- this creates a fat pointer not C usable
+    let ptr = Box::into_raw(Box::new(raw_box)); // <- transforms fat pointer into thin pointer
     (Some(trampoline), ptr as *mut c_void)
 }
 
