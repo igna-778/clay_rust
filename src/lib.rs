@@ -13,6 +13,7 @@ pub mod text;
 mod mem;
 pub mod renderers;
 
+use core::ffi::c_void;
 use core::marker::PhantomData;
 use std::cell::Cell;
 pub use crate::bindings::*;
@@ -174,7 +175,7 @@ pub struct Clay {
     #[cfg(not(feature = "std"))]
     _memory: *const core::ffi::c_void,
     /// Stores the raw pointer to the callback data for later cleanup
-    text_measure_callback: Option<&'static mut c_void>,
+    text_measure_callback: Option<&'static mut core::ffi::c_void>,
 }
 
 struct ClayLayoutScopeInternal<'clay> {
@@ -410,8 +411,8 @@ impl Clay {
         let boxed = Box::new((callback, userdata));
 
         // Get a raw pointer to the boxed data
-        let user_data_ptr = Box::into_raw(boxed) as _;
-
+        let user_data_ptr: *mut c_void = Box::into_raw(boxed) as _;
+        let user_data_borrow: &'static mut c_void = unsafe { &mut *user_data_ptr };
         // Register the callback with the external C function
         unsafe {
             Self::set_measure_text_function_unsafe(
@@ -421,7 +422,7 @@ impl Clay {
         }
 
         // Store the raw pointer for later cleanup
-        self.text_measure_callback = Some(user_data_ptr as *const core::ffi::c_void);
+        self.text_measure_callback = Some(user_data_borrow);
     }
 
     /// Set the callback for text measurement
@@ -436,14 +437,14 @@ impl Clay {
 
         // Get a raw pointer to the boxed data
         let user_data_ptr = Box::into_raw(boxed) as *mut core::ffi::c_void;
-
+        let user_data_borrow: &'static mut c_void = unsafe { &mut *user_data_ptr };
         // Register the callback with the external C function
         unsafe {
             Self::set_measure_text_function_unsafe(measure_text_trampoline::<F>, user_data_ptr);
         }
 
         // Store the raw pointer for later cleanup
-        self.text_measure_callback = Some(user_data_ptr as *const core::ffi::c_void);
+        self.text_measure_callback = Some(user_data_borrow);
     }
 
     /// Set the callback for text measurement with user data.
@@ -527,7 +528,7 @@ impl Clay {
     }
     pub fn scroll_container_data(&self, id: Id) -> Option<Clay_ScrollContainerData> {
         unsafe {
-            Clay_SetCurrentContext(self.context);
+            Clay_SetCurrentContext(self.context as *const _ as *mut _);
             let scroll_container_data = Clay_GetScrollContainerData(id.id);
 
             if scroll_container_data.found {
@@ -543,8 +544,9 @@ impl Clay {
 impl Drop for Clay {
     fn drop(&mut self) {
         unsafe {
-            if let Some(ptr) = self.text_measure_callback {
-                let _ = Box::from_raw(ptr as *mut (usize, usize));
+            if let Some(ptr) = &self.text_measure_callback {
+                let ptr = *(ptr as *const _ as *mut &mut (usize, usize)) as *mut (usize, usize) ;
+                let _ = Box::from_raw(ptr);
             }
 
             Clay_SetCurrentContext(core::ptr::null_mut() as _);
