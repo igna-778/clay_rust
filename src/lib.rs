@@ -299,6 +299,7 @@ impl Clay {
         ClayLayoutScope {
             clay: self,
             _phantom: core::marker::PhantomData,
+            _phantom2: core::marker::PhantomData,
             dropped: false,
         }
     }
