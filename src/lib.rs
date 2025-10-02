@@ -14,7 +14,7 @@ mod mem;
 pub mod renderers;
 
 use core::marker::PhantomData;
-
+use std::cell::Cell;
 pub use crate::bindings::*;
 use errors::Error;
 use id::Id;
@@ -180,10 +180,11 @@ pub struct Clay {
 pub struct ClayLayoutScope<'clay, 'render, ImageElementData, CustomElementData> {
     clay: &'clay mut Clay,
     _phantom: core::marker::PhantomData<(&'render ImageElementData, &'render CustomElementData)>,
+    _phantom2: core::marker::PhantomData<Cell<&'render ()>>,
     dropped: bool,
 }
 
-impl<'render, 'clay: 'render, ImageElementData: 'render, CustomElementData: 'render>
+impl<'render, 'clay, ImageElementData: 'render, CustomElementData: 'render>
     ClayLayoutScope<'clay, 'render, ImageElementData, CustomElementData>
 {
     /// Create an element, passing its config and a function to add childrens
