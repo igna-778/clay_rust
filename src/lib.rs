@@ -168,20 +168,24 @@ pub struct Clay {
     /// Memory used internally by clay
     #[cfg(feature = "std")]
     _memory: Vec<u8>,
-    context: *mut Clay_Context,
+    context: &'static mut Clay_Context,
     /// Memory used internally by clay. The caller is responsible for managing this memory in
     /// no_std case.
     #[cfg(not(feature = "std"))]
     _memory: *const core::ffi::c_void,
     /// Stores the raw pointer to the callback data for later cleanup
-    text_measure_callback: Option<*const core::ffi::c_void>,
+    text_measure_callback: Option<&'static mut c_void>,
+}
+
+struct ClayLayoutScopeInternal<'clay> {
+    clay: &'clay mut Clay,
+    dropped: bool,
 }
 
 pub struct ClayLayoutScope<'clay, 'render, ImageElementData, CustomElementData> {
-    clay: &'clay mut Clay,
+    inter: ClayLayoutScopeInternal<'clay>,
     _phantom: core::marker::PhantomData<(&'render ImageElementData, &'render CustomElementData)>,
     _phantom2: core::marker::PhantomData<Cell<&'render ()>>,
-    dropped: bool,
 }
 
 impl<'render, 'clay, ImageElementData: 'render, CustomElementData: 'render>
@@ -196,7 +200,7 @@ impl<'render, 'clay, ImageElementData: 'render, CustomElementData: 'render>
         f: F,
     ) {
         unsafe {
-            Clay_SetCurrentContext(self.clay.context);
+            Clay_SetCurrentContext(self.inter.clay.context);
             Clay__OpenElement();
             Clay__ConfigureOpenElement(declaration.inner);
         }
@@ -219,7 +223,7 @@ impl<'render, 'clay, ImageElementData: 'render, CustomElementData: 'render>
         f: F,
     ) {
         unsafe {
-            Clay_SetCurrentContext(self.clay.context);
+            Clay_SetCurrentContext(self.inter.clay.context as *const _ as *mut _);
             Clay__OpenElement();
         }
 
@@ -237,10 +241,10 @@ impl<'render, 'clay, ImageElementData: 'render, CustomElementData: 'render>
     }
 
     pub fn end(
-        &mut self,
+        mut self,
     ) -> impl Iterator<Item = RenderCommand<'render, ImageElementData, CustomElementData>> {
         let array = unsafe { Clay_EndLayout() };
-        self.dropped = true;
+        self.inter.dropped = true;
         let slice = unsafe { core::slice::from_raw_parts(array.internalArray, array.length as _) };
         slice
             .iter()
@@ -267,7 +271,7 @@ impl<'clay, 'render, ImageElementData, CustomElementData> core::ops::Deref
     type Target = Clay;
 
     fn deref(&self) -> &Self::Target {
-        self.clay
+        self.inter.clay
     }
 }
 
@@ -275,12 +279,12 @@ impl<'clay, 'render, ImageElementData, CustomElementData> core::ops::DerefMut
     for ClayLayoutScope<'clay, 'render, ImageElementData, CustomElementData>
 {
     fn deref_mut(&mut self) -> &mut Self::Target {
-        self.clay
+        self.inter.clay
     }
 }
 
-impl<ImageElementData, CustomElementData> Drop
-    for ClayLayoutScope<'_, '_, ImageElementData, CustomElementData>
+impl Drop
+    for ClayLayoutScopeInternal<'_>
 {
     fn drop(&mut self) {
         if !self.dropped {
@@ -297,10 +301,9 @@ impl Clay {
     ) -> ClayLayoutScope<'_, 'render, ImageElementData, CustomElementData> {
         unsafe { Clay_BeginLayout() };
         ClayLayoutScope {
-            clay: self,
+            inter: ClayLayoutScopeInternal { clay: self, dropped: false},
             _phantom: core::marker::PhantomData,
             _phantom2: core::marker::PhantomData,
-            dropped: false,
         }
     }
 
@@ -323,7 +326,7 @@ impl Clay {
                 },
             );
         }
-
+        let context: &'static mut Clay_Context = unsafe { &mut *context };
         Self {
             _memory: memory,
             context,
