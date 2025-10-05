@@ -15,7 +15,6 @@ pub mod renderers;
 
 use core::ffi::c_void;
 use core::marker::PhantomData;
-use std::cell::Cell;
 pub use crate::bindings::*;
 use errors::Error;
 use id::Id;
@@ -216,9 +215,9 @@ impl<'render, 'clay, ImageElementData: 'render, CustomElementData: 'render>
         G: FnOnce(
             &ClayLayoutScope<'clay, 'render, ImageElementData, CustomElementData>,
         ) -> Declaration<'render, ImageElementData, CustomElementData>,
-        F: FnOnce(&ClayLayoutScope<'clay, 'render, ImageElementData, CustomElementData>),
+        F: FnOnce(&mut ClayLayoutScope<'clay, 'render, ImageElementData, CustomElementData>),
     >(
-        &self,
+        &mut self,
         g: G,
         f: F,
     ) {
