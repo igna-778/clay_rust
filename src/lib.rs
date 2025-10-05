@@ -187,6 +187,21 @@ pub struct ClayLayoutScope<'clay, 'render, ImageElementData, CustomElementData> 
     _phantom: core::marker::PhantomData<(&'render ImageElementData, &'render CustomElementData)>,
 }
 
+pub struct ClayLayoutScopeOpenElement<'element,'clay, 'render, ImageElementData, CustomElementData> {
+    inter: &'element mut ClayLayoutScope<'clay, 'render, ImageElementData, CustomElementData>,
+    configured: bool,
+}
+
+impl<'element,'clay, 'render, ImageElementData, CustomElementData> ClayLayoutScopeOpenElement<'element,'clay, 'render, ImageElementData, CustomElementData> {
+
+    fn config(&mut self, declaration :&Declaration<'render, ImageElementData,CustomElementData>) {
+        unsafe {
+            Clay__ConfigureOpenElement(declaration.inner);
+        }
+    }
+
+}
+
 impl<'render, 'clay, ImageElementData: 'render, CustomElementData: 'render>
     ClayLayoutScope<'clay, 'render, ImageElementData, CustomElementData>
 {
@@ -208,6 +223,17 @@ impl<'render, 'clay, ImageElementData: 'render, CustomElementData: 'render>
 
         unsafe {
             Clay__CloseElement();
+        }
+    }
+
+    pub fn open(&mut self) -> ClayLayoutScopeOpenElement<ImageElementData, CustomElementData> {
+        unsafe {
+            Clay_SetCurrentContext(self.inter.clay.context);
+            Clay__OpenElement();
+        }
+        ClayLayoutScopeOpenElement {
+            inter: self,
+            configured: false,
         }
     }
 
@@ -290,6 +316,21 @@ impl Drop
             unsafe {
                 Clay_EndLayout();
             }
+        }
+    }
+}
+
+impl<ImageElementData, CustomElementData> Drop
+    for ClayLayoutScopeOpenElement<ImageElementData, CustomElementData>
+{
+    fn drop(&mut self) {
+        if !self.configured {
+            unsafe {
+                Clay__ConfigureOpenElement(Declaration::new().inner);
+            }
+        }
+        unsafe {
+            Clay__CloseElement();
         }
     }
 }
