@@ -186,7 +186,6 @@ struct ClayLayoutScopeInternal<'clay> {
 pub struct ClayLayoutScope<'clay, 'render, ImageElementData, CustomElementData> {
     inter: ClayLayoutScopeInternal<'clay>,
     _phantom: core::marker::PhantomData<(&'render ImageElementData, &'render CustomElementData)>,
-    _phantom2: core::marker::PhantomData<Cell<&'render ()>>,
 }
 
 impl<'render, 'clay, ImageElementData: 'render, CustomElementData: 'render>
@@ -253,7 +252,7 @@ impl<'render, 'clay, ImageElementData: 'render, CustomElementData: 'render>
     }
 
     /// Adds a text element to the current open element or to the root layout
-    pub fn text(&self, text: &'render str, config: TextElementConfig) {
+    pub fn text(&mut self, text: &'render str, config: TextElementConfig) {
         unsafe { Clay__OpenTextElement(text.into(), config.into()) };
     }
 
@@ -304,7 +303,6 @@ impl Clay {
         ClayLayoutScope {
             inter: ClayLayoutScopeInternal { clay: self, dropped: false},
             _phantom: core::marker::PhantomData,
-            _phantom2: core::marker::PhantomData,
         }
     }
 
