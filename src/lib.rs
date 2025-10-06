@@ -192,6 +192,10 @@ pub struct ClayLayoutScopeOpenElement<'element,'clay, 'render, ImageElementData,
     configured: bool,
 }
 
+pub trait OpenElement<'element,'clay, 'render, ImageElementData, CustomElementData> {
+    fn open(&'element mut self) -> ClayLayoutScopeOpenElement<'element,'clay,'render,ImageElementData, CustomElementData>;
+}
+
 impl<'element,'clay, 'render, ImageElementData, CustomElementData> ClayLayoutScopeOpenElement<'element,'clay, 'render, ImageElementData, CustomElementData> {
 
     fn config(&mut self, declaration :&Declaration<'render, ImageElementData,CustomElementData>) {
@@ -200,6 +204,39 @@ impl<'element,'clay, 'render, ImageElementData, CustomElementData> ClayLayoutSco
         }
     }
 
+}
+
+impl<'element,'clay, 'render, ImageElementData, CustomElementData>
+    OpenElement<'element,'clay, 'render, ImageElementData, CustomElementData> for
+    ClayLayoutScope<'clay, 'render, ImageElementData, CustomElementData> {
+
+
+    fn open(&'element mut self) -> ClayLayoutScopeOpenElement<'element,'clay,'render,ImageElementData, CustomElementData> {
+        unsafe {
+            Clay_SetCurrentContext(self.inter.clay.context);
+            Clay__OpenElement();
+        }
+        ClayLayoutScopeOpenElement {
+            inter: self,
+            configured: false,
+        }
+    }
+}
+impl<'element,'element2,'clay, 'render, ImageElementData, CustomElementData>
+    OpenElement<'element,'clay, 'render, ImageElementData, CustomElementData> for
+    ClayLayoutScopeOpenElement<'element2,'clay, 'render, ImageElementData, CustomElementData> {
+
+
+    fn open(&'element mut self) -> ClayLayoutScopeOpenElement<'element,'clay,'render,ImageElementData, CustomElementData> {
+        unsafe {
+            Clay_SetCurrentContext(self.inter.inter.clay.context);
+            Clay__OpenElement();
+        }
+        ClayLayoutScopeOpenElement {
+            inter: self.inter,
+            configured: false,
+        }
+    }
 }
 
 impl<'render, 'clay, ImageElementData: 'render, CustomElementData: 'render>
@@ -223,17 +260,6 @@ impl<'render, 'clay, ImageElementData: 'render, CustomElementData: 'render>
 
         unsafe {
             Clay__CloseElement();
-        }
-    }
-
-    pub fn open(&mut self) -> ClayLayoutScopeOpenElement<ImageElementData, CustomElementData> {
-        unsafe {
-            Clay_SetCurrentContext(self.inter.clay.context);
-            Clay__OpenElement();
-        }
-        ClayLayoutScopeOpenElement {
-            inter: self,
-            configured: false,
         }
     }
 
@@ -321,12 +347,12 @@ impl Drop
 }
 
 impl<ImageElementData, CustomElementData> Drop
-    for ClayLayoutScopeOpenElement<ImageElementData, CustomElementData>
+    for ClayLayoutScopeOpenElement<'_, '_, '_, ImageElementData, CustomElementData>
 {
     fn drop(&mut self) {
         if !self.configured {
             unsafe {
-                Clay__ConfigureOpenElement(Declaration::new().inner);
+                Clay__ConfigureOpenElement(Declaration::<ImageElementData, CustomElementData>::new().inner);
             }
         }
         unsafe {
