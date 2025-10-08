@@ -204,6 +204,10 @@ impl<'element,'clay, 'render, ImageElementData, CustomElementData> ClayLayoutSco
         }
     }
 
+    fn layout<'layout>(&'layout mut self) -> &'layout mut ClayLayoutScope<'clay, 'render, ImageElementData, CustomElementData> where 'element: 'layout {
+        self.inter
+    }
+
 }
 
 impl<'element,'clay, 'render, ImageElementData, CustomElementData>
