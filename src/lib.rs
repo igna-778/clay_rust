@@ -199,6 +199,8 @@ pub trait OpenElement<'element,'clay, 'render, ImageElementData, CustomElementDa
 impl<'element,'clay, 'render, ImageElementData, CustomElementData> ClayLayoutScopeOpenElement<'element,'clay, 'render, ImageElementData, CustomElementData> {
 
     pub fn config(&mut self, declaration :&Declaration<'render, ImageElementData,CustomElementData>) {
+        assert!(!self.configured);
+        self.configured = true;
         unsafe {
             Clay__ConfigureOpenElement(declaration.inner);
         }
