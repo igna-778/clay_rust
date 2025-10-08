@@ -198,13 +198,13 @@ pub trait OpenElement<'element,'clay, 'render, ImageElementData, CustomElementDa
 
 impl<'element,'clay, 'render, ImageElementData, CustomElementData> ClayLayoutScopeOpenElement<'element,'clay, 'render, ImageElementData, CustomElementData> {
 
-    fn config(&mut self, declaration :&Declaration<'render, ImageElementData,CustomElementData>) {
+    pub fn config(&mut self, declaration :&Declaration<'render, ImageElementData,CustomElementData>) {
         unsafe {
             Clay__ConfigureOpenElement(declaration.inner);
         }
     }
 
-    fn layout<'layout>(&'layout mut self) -> &'layout mut ClayLayoutScope<'clay, 'render, ImageElementData, CustomElementData> where 'element: 'layout {
+    pub fn layout<'layout>(&'layout mut self) -> &'layout mut ClayLayoutScope<'clay, 'render, ImageElementData, CustomElementData> where 'element: 'layout {
         self.inter
     }
 
