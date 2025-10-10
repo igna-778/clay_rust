@@ -1,3 +1,4 @@
+use std::sync::Arc;
 use crate::{bindings::*, color::Color, math::BoundingBox};
 
 /// Represents a rectangle with a specified color and corner radii.
@@ -217,15 +218,19 @@ pub struct RenderCommand<'a, ImageElementData, CustomElementData> {
     /// The z-index determines the stacking order of elements.
     /// Higher values are drawn above lower values.
     pub z_index: i16,
+
+    /// Owned Strings by ClayLayoutScope (Should Never be ACCESSED)
+    _owned_strings: Arc<Vec<String>>,
 }
 
 impl<ImageElementData, CustomElementData> RenderCommand<'_, ImageElementData, CustomElementData> {
-    pub(crate) unsafe fn from_clay_render_command(value: Clay_RenderCommand) -> Self {
+    pub(crate) unsafe fn from_clay_render_command(value: Clay_RenderCommand, _owned_strings: Arc<Vec<String>>) -> Self {
         Self {
             id: value.id,
             z_index: value.zIndex,
             bounding_box: value.boundingBox.into(),
             config: unsafe { RenderCommandConfig::from_clay_render_command(&value) },
+            _owned_strings,
         }
     }
 }

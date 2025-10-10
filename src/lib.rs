@@ -15,6 +15,7 @@ pub mod renderers;
 
 use core::ffi::c_void;
 use core::marker::PhantomData;
+use std::sync::Arc;
 pub use crate::bindings::*;
 use errors::Error;
 use id::Id;
@@ -185,6 +186,7 @@ struct ClayLayoutScopeInternal<'clay> {
 pub struct ClayLayoutScope<'clay, 'render, ImageElementData, CustomElementData> {
     inter: ClayLayoutScopeInternal<'clay>,
     _phantom: core::marker::PhantomData<(&'render ImageElementData, &'render CustomElementData)>,
+    strings: Arc<Vec<String>>,
 }
 
 pub struct ClayLayoutScopeOpenElement<'element,'clay, 'render, ImageElementData, CustomElementData> {
@@ -305,11 +307,18 @@ impl<'render, 'clay, ImageElementData: 'render, CustomElementData: 'render>
         let slice = unsafe { core::slice::from_raw_parts(array.internalArray, array.length as _) };
         slice
             .iter()
-            .map(|command| unsafe { RenderCommand::from_clay_render_command(*command) })
+            .map(move |command| unsafe { RenderCommand::from_clay_render_command(*command, self.strings.clone()) })
     }
 
     /// Adds a text element to the current open element or to the root layout
     pub fn text(&mut self, text: &'render str, config: TextElementConfig) {
+        unsafe { Clay__OpenTextElement(text.into(), config.into()) };
+    }
+
+    pub fn text_owned(&mut self, text: String, config: TextElementConfig) {
+        // Since we aren't exposing strings until end there should always be one reference
+        Arc::get_mut(&mut self.strings).expect("This Should Never Fail").push(text);
+        let text: &str = self.strings.last().unwrap();
         unsafe { Clay__OpenTextElement(text.into(), config.into()) };
     }
 
@@ -375,6 +384,7 @@ impl Clay {
         ClayLayoutScope {
             inter: ClayLayoutScopeInternal { clay: self, dropped: false},
             _phantom: core::marker::PhantomData,
+            strings: Arc::new(vec![]),
         }
     }
 
