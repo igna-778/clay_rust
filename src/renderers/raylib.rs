@@ -76,7 +76,7 @@ pub fn clay_raylib_render<'rl, 'a, CustomElementData: 'a>(
             // safety: raylib's BeginScissorMode is safe to call with any values.
             // we need to use this here because the regular begin_scissor_mode
             // ends the scissor mode on drop.
-            RenderCommandConfig::ScissorStart() => unsafe {
+            RenderCommandConfig::ScissorStart(_) => unsafe {
                 BeginScissorMode(
                     command.bounding_box.x as i32,
                     command.bounding_box.y as i32,

@@ -88,6 +88,15 @@ pub struct Custom<'a, CustomElementData> {
     pub data: &'a CustomElementData,
 }
 
+/// Represents a clip element with corner radii, clipping axis and position.
+#[derive(Debug, Clone)]
+pub struct Scissor {
+    pub horizontal: bool,
+    pub vertical: bool,
+    /// The corner radii for rounded edges.
+    pub corner_radii: CornerRadii,
+}
+
 impl From<Clay_RectangleRenderData> for Rectangle {
     fn from(value: Clay_RectangleRenderData) -> Self {
         Self {
@@ -165,6 +174,16 @@ impl<CustomElementData> Custom<'_, CustomElementData> {
     }
 }
 
+impl Scissor {
+    pub(crate) unsafe fn from_clay_scissor_element_data(value: Clay_ScrollRenderData) -> Self {
+        Self {
+            horizontal: value.horizontal.into(),
+            vertical: value.vertical.into(),
+            corner_radii: value.cornerRadius.into(),
+        }
+    }
+}
+
 #[derive(Debug, Clone)]
 pub enum RenderCommandConfig<'a, ImageElementData, CustomElementData> {
     None(),
@@ -172,7 +191,7 @@ pub enum RenderCommandConfig<'a, ImageElementData, CustomElementData> {
     Border(Border),
     Text(Text<'a>),
     Image(Image<'a, ImageElementData>),
-    ScissorStart(),
+    ScissorStart(Scissor),
     ScissorEnd(),
     Custom(Custom<'a, CustomElementData>),
 }
@@ -196,7 +215,9 @@ impl<ImageElementData, CustomElementData>
             Clay_RenderCommandType_CLAY_RENDER_COMMAND_TYPE_IMAGE => {
                 Self::Image(unsafe { Image::from_clay_image_render_data(value.renderData.image) })
             }
-            Clay_RenderCommandType_CLAY_RENDER_COMMAND_TYPE_SCISSOR_START => Self::ScissorStart(),
+            Clay_RenderCommandType_CLAY_RENDER_COMMAND_TYPE_SCISSOR_START => {
+                Self::ScissorStart(unsafe { Scissor::from_clay_scissor_element_data(value.renderData.clip) })
+            },
             Clay_RenderCommandType_CLAY_RENDER_COMMAND_TYPE_SCISSOR_END => Self::ScissorEnd(),
             Clay_RenderCommandType_CLAY_RENDER_COMMAND_TYPE_CUSTOM => Self::Custom(unsafe {
                 Custom::from_clay_custom_element_data(value.renderData.custom)

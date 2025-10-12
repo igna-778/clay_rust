@@ -617,6 +617,9 @@ typedef struct Clay_CustomRenderData {
 typedef struct Clay_ScrollRenderData {
     bool horizontal;
     bool vertical;
+    // Controls the "radius", or corner rounding of this image.
+    // The rounding is determined by drawing a circle inset into the element corner by (radius, radius) pixels.
+    Clay_CornerRadius cornerRadius;
 } Clay_ClipRenderData;
 
 // Render command data when commandType == CLAY_RENDER_COMMAND_TYPE_BORDER
@@ -2886,6 +2889,7 @@ void Clay__CalculateFinalLayout(void) {
                                 .clip = {
                                     .horizontal = elementConfig->config.clipElementConfig->horizontal,
                                     .vertical = elementConfig->config.clipElementConfig->vertical,
+                                    .cornerRadius = sharedConfig->cornerRadius,
                                 }
                             };
                             break;

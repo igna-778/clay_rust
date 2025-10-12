@@ -1323,6 +1323,7 @@ pub struct Clay_CustomRenderData {
 pub struct Clay_ScrollRenderData {
     pub horizontal: bool,
     pub vertical: bool,
+    pub cornerRadius: Clay_CornerRadius,
 }
 pub type Clay_ClipRenderData = Clay_ScrollRenderData;
 #[repr(C)]
