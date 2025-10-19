@@ -29,7 +29,7 @@ pub enum Sizing<'render> {
     /// Sets width/height as a percentage of its parent. Value should be between `0.0` and `1.0`.
     Percent(f32),
     /// Sets the height to be dependent by the width
-    Constrained(Box<dyn Fn(f32) -> f32 + 'render>),
+    Constrained(&'render dyn Fn(f32) -> f32),
 }
 
 impl Debug for Sizing<'_> {
@@ -74,7 +74,7 @@ impl From<Sizing<'_>> for Clay_SizingAxis {
                 size: Clay_SizingAxis__bindgen_ty_1 { percent },
             },
             Sizing::Constrained(fun) => {
-                let (fun, user_data) = to_c_callback(fun);
+                let (fun, user_data) = to_c_callback(Box::new(fun));
                 Self {
                     type_: SizingType::Constrained as _,
                     size: Clay_SizingAxis__bindgen_ty_1 {
