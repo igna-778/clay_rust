@@ -881,6 +881,8 @@ CLAY_DLL_EXPORT Clay_ElementId Clay_GetElementIdWithIndex(Clay_String idString, 
 // The returned Clay_ElementData contains a `found` bool that will be true if an element with the provided ID was found.
 // This ID can be calculated either with CLAY_ID() for string literal IDs, or Clay_GetElementId for dynamic strings.
 CLAY_DLL_EXPORT Clay_ElementData Clay_GetElementData(Clay_ElementId id);
+// Returns the Clay_ElementId of the current open Element.
+CLAY_DLL_EXPORT uint32_t Clay_CurrentElementId(void);
 // Returns true if the pointer position provided by Clay_SetPointerState is within the current element's bounding box.
 // Works during element declaration, e.g. CLAY({ .backgroundColor = Clay_Hovered() ? BLUE : RED });
 CLAY_DLL_EXPORT bool Clay_Hovered(void);
@@ -4310,6 +4312,16 @@ Clay_ElementId Clay_GetElementId(Clay_String idString) {
 CLAY_WASM_EXPORT("Clay_GetElementIdWithIndex")
 Clay_ElementId Clay_GetElementIdWithIndex(Clay_String idString, uint32_t index) {
     return Clay__HashStringWithOffset(idString, index, 0);
+}
+
+uint32_t Clay_CurrentElementId(void) {
+    Clay_Context* context = Clay_GetCurrentContext();
+    Clay_LayoutElement *openLayoutElement = Clay__GetOpenLayoutElement();
+    // If the element has no id attached at this point, we need to generate one
+    if (openLayoutElement->id == 0) {
+        Clay__GenerateIdForAnonymousElement(openLayoutElement);
+    }
+    return openLayoutElement->id;
 }
 
 bool Clay_Hovered(void) {

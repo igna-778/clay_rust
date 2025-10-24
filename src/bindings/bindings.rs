@@ -1496,6 +1496,10 @@ extern "C" {
     pub fn Clay_GetElementData(id: Clay_ElementId) -> Clay_ElementData;
 }
 extern "C" {
+    pub fn Clay_CurrentElementId() -> __uint32_t;
+}
+
+extern "C" {
     pub fn Clay_Hovered() -> bool;
 }
 extern "C" {

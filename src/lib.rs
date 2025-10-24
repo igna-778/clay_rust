@@ -606,6 +606,17 @@ impl Clay {
             None
         }
     }
+    pub fn open_id(&self) -> Option<Id> {
+        let id = unsafe { Clay_CurrentElementId() };
+        Some(Id {
+            id: Clay_ElementId {
+                id,
+                offset: 0,
+                baseId: 0,
+                stringId: "".into(),
+            },
+        })
+    }
     pub fn scroll_container_data(&self, id: Id) -> Option<Clay_ScrollContainerData> {
         unsafe {
             Clay_SetCurrentContext(self.context as *const _ as *mut _);
