@@ -1,5 +1,4 @@
-use std::sync::Arc;
-use crate::{bindings::*, color::Color, math::BoundingBox};
+use crate::{bindings::*, color::Color, math::BoundingBox, OwnedData};
 
 /// Represents a rectangle with a specified color and corner radii.
 #[derive(Debug, Clone)]
@@ -241,11 +240,11 @@ pub struct RenderCommand<'a, ImageElementData, CustomElementData> {
     pub z_index: i16,
 
     /// Owned Strings by ClayLayoutScope (Should Never be ACCESSED)
-    _owned_strings: Arc<Vec<String>>,
+    _owned_strings: OwnedData<'a,ImageElementData,CustomElementData>,
 }
 
-impl<ImageElementData, CustomElementData> RenderCommand<'_, ImageElementData, CustomElementData> {
-    pub(crate) unsafe fn from_clay_render_command(value: Clay_RenderCommand, _owned_strings: Arc<Vec<String>>) -> Self {
+impl<'render,ImageElementData, CustomElementData> RenderCommand<'render, ImageElementData, CustomElementData> {
+    pub(crate) unsafe fn from_clay_render_command(value: Clay_RenderCommand, _owned_strings: OwnedData<'render,ImageElementData,CustomElementData>) -> Self {
         Self {
             id: value.id,
             z_index: value.zIndex,
