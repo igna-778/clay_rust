@@ -15,6 +15,7 @@ pub mod renderers;
 
 use core::ffi::c_void;
 use core::marker::PhantomData;
+use std::fmt::{Debug, Formatter};
 use std::sync::{Arc};
 pub use crate::bindings::*;
 use errors::Error;
@@ -183,56 +184,44 @@ struct ClayLayoutScopeInternal<'clay> {
     dropped: bool,
 }
 
-#[derive(Debug)]
-enum TypeHolder<ImageElementData, CustomElementData> {
-    String(String),
-    Image(ImageElementData),
-    Custom(CustomElementData),
+type OwnedData<'render> = Arc<OwnedDataInner<'render>>;
+
+struct OwnedDataInner<'render>  {
+    inner: Vec<&'render dyn ClayOwnedData<'render>>,
 }
 
-type OwnedData<'render,ImageElementData,CustomElementData> = Arc<OwnedDataInner<'render,ImageElementData,CustomElementData>>;
-
-#[derive(Debug)]
-struct OwnedDataInner<'render,ImageElementData,CustomElementData>  {
-    inner: Vec<&'render TypeHolder<ImageElementData, CustomElementData>>,
-    _phantom: core::marker::PhantomData<(&'render ImageElementData, &'render CustomElementData)>,
+impl Debug for OwnedDataInner<'_> {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        f.write_str("OwnedDataInner")
+    }
 }
-impl<'render,ImageElementData,CustomElementData> OwnedDataInner<'render,ImageElementData,CustomElementData> {
+
+trait ClayOwnedData<'render> {}
+
+impl<'render, T: 'render> ClayOwnedData<'render> for T {}
+
+impl<'render> OwnedDataInner<'render> {
 
     fn new() -> Self {
         Self {
             inner: vec![],
-            _phantom: core::marker::PhantomData,
         }
     }
 
-    fn add_string(&mut self, string: String) -> &'render str {
-        let str = &*Box::leak(Box::new( TypeHolder::String(string)));
+    fn own<T: 'render>(&mut self, stuff: T) -> &'render T {
+        let str = &*Box::leak(Box::new(stuff));
         self.inner.push(str);
-        let TypeHolder::String(str) = str else { unreachable!() };
         str
     }
-    fn add_image(&mut self, image: ImageElementData) -> &'render ImageElementData {
-        let image = &*Box::leak(Box::new( TypeHolder::Image(image)));
-        self.inner.push(image);
-        let TypeHolder::Image(image) = image else { unreachable!() };
-        image
-    }
 
-    fn add_custom(&mut self, custom: CustomElementData) -> &'render CustomElementData {
-        let custom = &*Box::leak(Box::new( TypeHolder::Custom(custom)));
-        self.inner.push(custom);
-        let TypeHolder::Custom(custom) = custom else { unreachable!() };
-        custom
-    }
 }
 
-impl<'render,ImageElementData,CustomElementData> Drop for OwnedDataInner<'render,ImageElementData,CustomElementData> {
+impl<'render> Drop for OwnedDataInner<'render> {
     fn drop(&mut self) {
         for owned in self.inner.iter_mut() {
             unsafe {
                 let owned = *owned;
-                let _ = Box::from_raw(owned as *const TypeHolder<ImageElementData,CustomElementData> as *mut TypeHolder<ImageElementData,CustomElementData>);
+                let _ = Box::from_raw(owned as *const dyn ClayOwnedData as *mut dyn ClayOwnedData);
             }
         }
     }
@@ -241,7 +230,7 @@ impl<'render,ImageElementData,CustomElementData> Drop for OwnedDataInner<'render
 pub struct ClayLayoutScope<'clay, 'render, ImageElementData, CustomElementData> {
     inter: ClayLayoutScopeInternal<'clay>,
     _phantom: core::marker::PhantomData<(&'render ImageElementData, &'render CustomElementData)>,
-    owned: OwnedDataInner<'render,ImageElementData, CustomElementData>,
+    owned: OwnedDataInner<'render>,
 }
 
 pub struct ClayLayoutScopeOpenElement<'element,'clay, 'render, ImageElementData, CustomElementData> {
@@ -371,18 +360,8 @@ impl<'render, 'clay, ImageElementData: 'render, CustomElementData: 'render>
         unsafe { Clay__OpenTextElement(text.into(), config.into()) };
     }
 
-    pub fn text_owned(&mut self, text: String, config: TextElementConfig) {
-        // Since we aren't exposing owned until end there should always be one reference
-        let text = self.owned.add_string(text);
-        unsafe { Clay__OpenTextElement((text).into(), config.into()) };
-    }
-
-    pub fn own_image(&mut self, image: ImageElementData) -> &'render ImageElementData {
-        self.owned.add_image(image)
-    }
-
-    pub fn own_custom(&mut self, custom: CustomElementData) -> &'render CustomElementData {
-        self.owned.add_custom(custom)
+    pub fn own<T: 'render>(&mut self, stuff: T) -> &'render T {
+        self.owned.own(stuff)
     }
 
     pub fn hovered(&self) -> bool {

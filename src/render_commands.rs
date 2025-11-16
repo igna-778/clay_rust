@@ -240,11 +240,11 @@ pub struct RenderCommand<'a, ImageElementData, CustomElementData> {
     pub z_index: i16,
 
     /// Owned Strings by ClayLayoutScope (Should Never be ACCESSED)
-    _owned_strings: OwnedData<'a,ImageElementData,CustomElementData>,
+    _owned_strings: OwnedData<'a>,
 }
 
 impl<'render,ImageElementData, CustomElementData> RenderCommand<'render, ImageElementData, CustomElementData> {
-    pub(crate) unsafe fn from_clay_render_command(value: Clay_RenderCommand, _owned_strings: OwnedData<'render,ImageElementData,CustomElementData>) -> Self {
+    pub(crate) unsafe fn from_clay_render_command(value: Clay_RenderCommand, _owned_strings: OwnedData<'render>) -> Self {
         Self {
             id: value.id,
             z_index: value.zIndex,
