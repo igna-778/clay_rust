@@ -279,10 +279,10 @@ macro_rules! fit {
         $crate::layout::Sizing::Fit($min, $max)
     };
     ($min:expr) => {
-        fit!($min, f32::MAX)
+        $crate::fit!($min, f32::MAX)
     };
     () => {
-        fit!(0.0)
+        $crate::fit!(0.0)
     };
 }
 
@@ -293,10 +293,10 @@ macro_rules! grow {
         $crate::layout::Sizing::Grow($min, $max)
     };
     ($min:expr) => {
-        grow!($min, f32::MAX)
+        $crate::grow!($min, f32::MAX)
     };
     () => {
-        grow!(0.0)
+        $crate::grow!(0.0)
     };
 }
 
