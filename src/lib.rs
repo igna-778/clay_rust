@@ -360,6 +360,11 @@ impl<'render, 'clay, ImageElementData: 'render, CustomElementData: 'render>
         unsafe { Clay__OpenTextElement(text.into(), config.into()) };
     }
 
+    pub fn text_owned(&mut self, text: String, config: TextElementConfig) {
+        let text: &str = self.own(text);
+        unsafe { Clay__OpenTextElement(text.into(), config.into()) };
+    }
+
     pub fn own<T: 'render>(&mut self, stuff: T) -> &'render T {
         self.owned.own(stuff)
     }
